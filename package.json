@@ -1,0 +1,21 @@
+{
+  "name": "naphcanvas",
+  "version": "1.0.0",
+  "description": "springmass.js =============",
+  "main": "springmass.js",
+  "scripts": {
+    "dev": "parcel public/index.html",
+    "parse":"tsc parser\\index.ts --lib ES2015 && node parser"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/sdk": "0.0.105",
+    "lodash": "^4.17.15",
+    "parcel": "^1.12.4"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.149",
+    "typescript": "^3.7.3"
+  }
+}
