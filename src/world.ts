@@ -36,15 +36,18 @@ export class World {
   ongoingTouches: MyTouch[];
   num_touch_start: number;
   datamodel: DMMF.Datamodel;
+  ctx: CanvasRenderingContext2D | null;
 
   constructor(canvasid: string, datamodel: DMMF.Datamodel) {
     this.origin = 0;
     this.timer = new Timer();
+    this.timer.mark_time()Zz;
     this.models = [] ;
     this.radius = 40;
     this.springs = []
     this.datamodel = datamodel
     this.canvas = document.getElementById(canvasid) as HTMLCanvasElement;
+    this.ctx = this.canvas.getContext("2d")
 
     this.hover_model = -1;
     this.dragged_model = -1;
@@ -160,14 +163,16 @@ export class World {
     this.animate();
     this.origin += 10;
     if (this.origin > 500) this.origin = 10;
-    let ctx = this.canvas.getContext("2d");
+    let ctx = this.ctx;
     if (ctx) {
       ctx.canvas.width = window.innerWidth;
       ctx.canvas.height = window.innerHeight;
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      ctx.fillStyle = "blue";
-      ctx.fill();
+      ctx.fillStyle =  "rgb(244, 248, 250)";
+      ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
       this.models.forEach((model, i) => {
+        console.log(model);
         model.render(ctx, this.hover_model === i, this.dragged_model === i)
       })
 

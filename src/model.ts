@@ -52,6 +52,7 @@ class ModelHeader{
   }
   public render(ctx: CanvasRenderingContext2D){
     ctx.fillStyle = "white";
+    // console.log(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.parent.height);
     ctx.fillRect(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.parent.height)
     ctx.fillStyle = "#15BD76";
     ctx.fillRect(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.height)
@@ -87,8 +88,6 @@ export class Model {
     return this.pos.y + (this.height / 2)
   }
   public render(ctx: CanvasRenderingContext2D, hovering: boolean, dragging: boolean){
-
-
     const header = new ModelHeader(this, this.model)
     header.render(ctx)
     ctx.fillStyle = "white";
