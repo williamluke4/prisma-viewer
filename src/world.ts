@@ -22,7 +22,21 @@ interface MyTouch {
   timer: Timer;
   last_pos: Vec;
 }
+function drawSpline(ctx: CanvasRenderingContext2D ,start: Vec, end: Vec){
 
+  const dist =  start.calc_dist(end)
+  ctx.beginPath()
+  ctx.moveTo(start.x || 0, start.y || 0)
+  ctx.bezierCurveTo(
+    start.x + dist * 0.25 || 0, // cp1 x
+    start.y || 0, // cp1 y
+    end.x - dist * 0.75 || 0, // cp2 x
+    end.y || 0, // cp2 y
+    end.x || 0, // end x
+    end.y || 0
+  ), //
+  ctx.stroke()
+}
 export class World {
   origin: number;
   models:  Model[];
@@ -41,7 +55,7 @@ export class World {
   constructor(canvasid: string, datamodel: DMMF.Datamodel) {
     this.origin = 0;
     this.timer = new Timer();
-    this.timer.mark_time()Zz;
+    this.timer.mark_time();
     this.models = [] ;
     this.radius = 40;
     this.springs = []
@@ -171,20 +185,31 @@ export class World {
       ctx.fillStyle =  "rgb(244, 248, 250)";
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-      this.models.forEach((model, i) => {
-        console.log(model);
-        model.render(ctx, this.hover_model === i, this.dragged_model === i)
-      })
-
+      // Render Spring Connections
+      ctx.strokeStyle =  "#808080";
       ctx.setLineDash([4, 4]);
       this.springs.forEach((spring, i) => {
         let a = this.models[spring.from_model_idx];
-        let b = this.models[spring.from_model_idx];
-        ctx.beginPath();
-        ctx.moveTo(a.cx(), a.cy());
-        ctx.lineTo(b.cx(), b.cy());
-        ctx.stroke();
+        let b = this.models[spring.to_model_idx];
+        const start = a.center()
+        const end = b.center()
+
+        start.x = start.x + a.width/2
+        end.x = end.x - b.width/2
+
+        drawSpline(ctx, start, end)
+
+        // ctx.beginPath();
+        // ctx.moveTo(a.cx(), a.cy());
+        // ctx.lineTo(b.cx(), b.cy());
+        // ctx.stroke();
       })
+      // Render Models
+      this.models.forEach((model, i) => {
+        model.render(ctx, this.hover_model === i, this.dragged_model === i)
+      })
+
+      
     } else {
       console.error("Canvas Context Not Found");
     }
@@ -233,12 +258,13 @@ function calc_new_frame(
   function calc_collide_power(p1: Model, p2: Model, dist: Vec) {
     const collision_x_dist = p1.width/2 + p2.width/2
     const collision_y_dist = p1.height/2 + p2.height/2
+    const acc_x_dist = dist.x - collision_x_dist
+    const acc_y_dist = dist.y - collision_y_dist
 
-    if (dist.x > collision_x_dist*2 && dist.y > collision_y_dist*2) return new Vec();
-    
+    if (acc_x_dist > 20 || acc_y_dist > 20) return new Vec();
     let deltaV = p2.velocity.sub(p1.velocity);
-    let force_x = 1000/ (dist.x || 0.1);
-    let force_y = 1000/(dist.y  || 0.1);
+    let force_x = deltaV.x/ (acc_x_dist || 0.001);
+    let force_y = deltaV.y/(acc_y_dist  || 0.001);
     
     let npos1 = p1.center().div(dist);
     let npos2 = p2.center().div(dist);
@@ -297,7 +323,7 @@ function calc_new_frame(
     //int i;
     let models = decode_models(y);
     let dmodels = [];
-    const DRAG = 0.5
+    const DRAG = 0.1
     let i;
     for (i = 0; i < num_models; i++) {
       let p = models[i];
