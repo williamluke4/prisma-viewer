@@ -62,8 +62,10 @@ export class World {
     this.num_touch_start = 0;
     this.init_world();
     this.attach_handlers();
-    this.ctx.canvas.width = window.innerWidth;
-    this.ctx.canvas.height = window.innerHeight;
+    if(this.ctx){
+      this.ctx.canvas.width = window.innerWidth;
+      this.ctx.canvas.height = window.innerHeight;
+    }
   }
   public init_rand = (model: Model) => {
     model.pos.x = my_rand(WIDTH, this.canvas.width - model.width);
@@ -77,7 +79,7 @@ export class World {
 
     this.datamodel.models.forEach((model: DMMF.Model, i: number) => {
       model.fields.forEach((field: DMMF.Field, fieldIdx: number) => {
-        if(field.kind === 'object' && field.relationName && !loadedRelations.includes(field.relationName)){
+        if((field.kind as any) === 'object' && field.relationName && !loadedRelations.includes(field.relationName)){
           loadedRelations.push(field.relationName)
           const from_model_idx = i
           const from_field_idx = fieldIdx
@@ -93,10 +95,10 @@ export class World {
   }
   public init_world = () => {
     this.springs = this.loadSprings()
-    console.log(this.springs);
     for (let i = 0; i < this.datamodel.models.length; i++) {
       const prismaModel = this.datamodel.models[i]
-      let p = new Model(this.canvas.getContext("2d"), prismaModel);
+      const ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D
+      let p = new Model(ctx, prismaModel);
       this.init_rand(p);
       this.models.push(p);
     }
@@ -108,24 +110,6 @@ export class World {
       .push(this.dragged_model)
       .without(-1)
       .value();
-  }
-
-  public animate = () => {
-    if (this.timer.time_diff === 0) return; //not enought time has passed, dont animate-crach fix
-    if (this.models.length === 0) return;
-    let new_models = calc_new_frame(
-      this.models,
-      this.springs,
-      this.radius,
-      this.timer,
-      this.canvas.width,
-      this.canvas.height
-    );
-    let dragged = this.get_dragged_indexes();
-    dragged.forEach((drag, x) => {
-      new_models[x] = this.models[x]; //when dragging, dissregard animate results for dragged model
-    });
-    this.models = new_models;
   }
 
   public find_model = (point: Vec) => {
@@ -169,25 +153,24 @@ export class World {
       this.models[this.dragged_model].velocity = mouse_speed.mult(20);
       this.draw();
       return;
-    } else if(this.select_start) {
+    } else if(this.select_start && this.ctx) {
         this.ctx.strokeStyle =  "black";
         this.ctx.lineWidth = 10;
-
         this.ctx.strokeRect(this.select_start.x, this.select_start.y, mouse_point.x - this.select_start.x, mouse_point.y - this.select_start.y)
         this.ctx.lineWidth = 1;
 
     }
     this.hover_model = this.find_model(mouse_point);
   }
-  public autolayout(){
-    const {width, height} = autolayout(this.models, this.springs)
-    
-    this.canvas.height = height + 300;
-    this.canvas.width = window.innerWidth  > width + 300 ? window.innerWidth : width + 300 ;
+  public auto(){
+    const dims = autolayout(this.models, this.springs)
+    if(dims.width && dims.height){
+      this.canvas.height = dims.height + 300;
+      this.canvas.width = window.innerWidth  > dims.width + 300 ? window.innerWidth : dims.width + 300 ;
+    }
   }
   public draw = () => {
     this.timer.mark_time();
-    this.simulate && this.animate();
     this.origin += 10;
     if (this.origin > 500) this.origin = 10;
     let ctx = this.ctx;
@@ -202,31 +185,30 @@ export class World {
       ctx.strokeStyle =  "#808080";
       // ctx.setLineDash([4, 4]);
       this.springs.forEach((spring, i) => {
-        spring.render(ctx, this.models)
+        spring.render(ctx as CanvasRenderingContext2D, this.models)
       })
       // Render Models
       this.models.forEach((model, i) => {
-        model.render(ctx, this.hover_model === i, this.dragged_model === i)
+        model.render(ctx as CanvasRenderingContext2D, this.hover_model === i, this.dragged_model === i)
       })
+      
 
       
     } else {
       console.error("Canvas Context Not Found");
     }
   }
-  public toggleSimulation = (ev: KeyboardEvent) => {
-    if(ev.key === 's') {
-      this.simulate = !this.simulate
-    } else if(ev.key === "a"){
+  public toggleLayout = (ev: KeyboardEvent) => {
+    if(ev.key === "a"){
       console.log("AutoLayout");
-      this.autolayout()
+      this.auto()
     }
   }
   public attach_handlers = () => {
     this.canvas.addEventListener("mouseup", this.mouseup, false);
     this.canvas.addEventListener("mousemove", this.mousemove, false);
     this.canvas.addEventListener("mousedown", this.mousedown, false);
-    window.addEventListener("keydown", this.toggleSimulation, false)
+    window.addEventListener("keydown", this.toggleLayout, false)
     setInterval(this.draw, 30);
   }
 }

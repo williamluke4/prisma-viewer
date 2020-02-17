@@ -1,28 +1,31 @@
 {
-  "name": "naphcanvas",
+  "name": "prisma-viewer",
   "version": "1.0.0",
-  "description": "springmass.js =============",
-  "main": "springmass.js",
+  "description": "Displays Prisma Datamodels",
+  "main": "index.js",
   "scripts": {
     "dev": "parcel public/index.html",
-    "parse": "tsc parser\\index.ts --lib ES2015 && node parser",
     "tsc": "tsc -d",
     "ncc": "ncc build dist/bin.js -o build"
-
   },
   "bin": {
-    "naph": "build/index.js"
+    "pv": "build/index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/sdk": "0.0.105",
+    "@prisma/sdk": "0.0.204",
     "arg": "^4.1.2",
     "chalk": "^2.4.2",
     "dagre": "^0.8.5",
+    "express": "^4.17.1",
+    "fastify": "^2.12.0",
     "lodash": "^4.17.15",
     "parcel": "^1.12.4",
-    "strip-indent": "^3.0.0"
+    "parcel-bundler": "^1.12.4",
+    "prisma2": "^2.0.0-preview021",
+    "strip-indent": "^3.0.0",
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
     "@types/dagre": "^0.7.42",

@@ -1,6 +1,6 @@
 import { Command } from './helpers/types'
 
-const packageJson = require('../../package.json')
+const packageJson = require('../../../package.json')
 
 export class Version implements Command {
   static new(): Version {

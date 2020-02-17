@@ -5,7 +5,7 @@ import { Command, Commands } from './helpers/types'
 import { isError, format } from 'util'
 import { unknownCommand, HelpError } from './help'
 import { arg } from './helpers/utils'
-import { Run } from './Run'
+import { Run } from './run'
 
 /**
  * CLI command
@@ -57,14 +57,15 @@ export class CLI implements Command {
 
   // static help template
   private static help = format(`
-    ${chalk.bold.green('ಠ_ಠ')} Naph 
+    ${chalk.bold.green('Prisma Viewer   ಠ_ಠ')}
+
     ${chalk.bold('Usage')}
-      ${chalk.dim(`$`)} naph [path]
+      ${chalk.dim(`$`)} pv [path]
       
     ${chalk.bold('Options')}
       -h, --help       Displays this help message
     ${chalk.bold('Examples')}
-      ${chalk.dim(`$`)} naph 
-      ${chalk.dim(`$`)} naph ./schema.prisma
+      ${chalk.dim(`$`)} pv 
+      ${chalk.dim(`$`)} pv ./schema.prisma
   `)
 }
