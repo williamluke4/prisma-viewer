@@ -61,5 +61,8 @@ export class Vec {
   public magnitude(){
     return Math.sqrt((this.x * this.x) + (this.y * this.y))
   }
+  public copy(){
+    return new Vec(this.x, this.y)
+  }
 }
 

@@ -9,6 +9,7 @@ import { Spring } from "./spring";
 import { STRING_LEN, NUM_STEPS } from "./constants";
 import { Model } from './model';
 import { DMMF } from '@prisma/generator-helper';
+import { autolayout } from './darge';
 
 const WIDTH = 100
 const HEIGHT = 120
@@ -22,21 +23,7 @@ interface MyTouch {
   timer: Timer;
   last_pos: Vec;
 }
-function drawSpline(ctx: CanvasRenderingContext2D ,start: Vec, end: Vec){
 
-  const dist =  start.calc_dist(end)
-  ctx.beginPath()
-  ctx.moveTo(start.x || 0, start.y || 0)
-  ctx.bezierCurveTo(
-    start.x + dist * 0.25 || 0, // cp1 x
-    start.y || 0, // cp1 y
-    end.x - dist * 0.75 || 0, // cp2 x
-    end.y || 0, // cp2 y
-    end.x || 0, // end x
-    end.y || 0
-  ), //
-  ctx.stroke()
-}
 export class World {
   origin: number;
   models:  Model[];
@@ -51,6 +38,9 @@ export class World {
   num_touch_start: number;
   datamodel: DMMF.Datamodel;
   ctx: CanvasRenderingContext2D | null;
+  simulate: boolean;
+  select_start: Vec | null;
+  selection: Model[];
 
   constructor(canvasid: string, datamodel: DMMF.Datamodel) {
     this.origin = 0;
@@ -62,14 +52,18 @@ export class World {
     this.datamodel = datamodel
     this.canvas = document.getElementById(canvasid) as HTMLCanvasElement;
     this.ctx = this.canvas.getContext("2d")
-
+    this.simulate = true;
     this.hover_model = -1;
     this.dragged_model = -1;
     this.dragged_model_offset = new Vec();
     this.ongoingTouches = [];
+    this.select_start = null;
+    this.selection = []
     this.num_touch_start = 0;
     this.init_world();
     this.attach_handlers();
+    this.ctx.canvas.width = window.innerWidth;
+    this.ctx.canvas.height = window.innerHeight;
   }
   public init_rand = (model: Model) => {
     model.pos.x = my_rand(WIDTH, this.canvas.width - model.width);
@@ -77,16 +71,20 @@ export class World {
     model.velocity.x = my_rand(-1, 1);
     model.velocity.y = my_rand(1, 2);
   }
-  public loadConnections(){
+  public loadSprings(){
     const loadedRelations: string [] = []
-    const connections:  number[][] = []
+    const connections:  Spring[] = []
 
     this.datamodel.models.forEach((model: DMMF.Model, i: number) => {
-      model.fields.forEach((field: DMMF.Field) => {
+      model.fields.forEach((field: DMMF.Field, fieldIdx: number) => {
         if(field.kind === 'object' && field.relationName && !loadedRelations.includes(field.relationName)){
           loadedRelations.push(field.relationName)
-          const to = this.datamodel.models.findIndex(m => m.name === field.type)
-          if(typeof to === 'number') connections.push([i, to])
+          const from_model_idx = i
+          const from_field_idx = fieldIdx
+          const to_model_idx = this.datamodel.models.findIndex(m => m.name === field.type)
+          const to_model = this.datamodel.models[to_model_idx]
+          const to_field_idx = to_model.fields.findIndex(f => field.relationName === f.relationName)
+          if(to_model_idx !==  -1) connections.push(new Spring(from_model_idx, to_model_idx, from_field_idx, to_field_idx))
           
         }
       })
@@ -94,8 +92,8 @@ export class World {
     return connections;
   }
   public init_world = () => {
-    const connections = this.loadConnections()
-    connections.forEach(conn => this.springs.push(new Spring(conn[0], conn[1])))
+    this.springs = this.loadSprings()
+    console.log(this.springs);
     for (let i = 0; i < this.datamodel.models.length; i++) {
       const prismaModel = this.datamodel.models[i]
       let p = new Model(this.canvas.getContext("2d"), prismaModel);
@@ -133,7 +131,7 @@ export class World {
   public find_model = (point: Vec) => {
     return this.models.findIndex(x => {
       const d = dist(point, x.center())
-      return d < x.width || d < x.height
+      return d < x.width/2 || d < x.height/2
     });
   }
 
@@ -142,67 +140,69 @@ export class World {
     return new Vec(event.clientX - rect.left, event.clientY - rect.top);
   }
 
-  // public mouseup = () => {
-  //   this.dragged_model = -1;
-  // }
+  public mouseup = () => {
+    this.dragged_model = -1;
+    this.select_start = null
+  }
 
-  // public mousedown = (event: MouseEvent) => {
-  //   let mousedown_point = this.point_from_event(event);
-  //   this.dragged_model = this.find_model(mousedown_point);
-  //   if (this.dragged_model == -1) this.models.push(new Model(this.canvas.getContext("2d"), {} ,mousedown_point));
-  //   else {
-  //     this.dragged_model_offset = this.models[this.dragged_model].pos.sub(
-  //       mousedown_point
-  //     );
-  //   }
-  // }
+  public mousedown = (event: MouseEvent) => {
+    let mousedown_point = this.point_from_event(event);
+    this.dragged_model = this.find_model(mousedown_point);
+    if (this.dragged_model == -1) {
+      this.select_start = mousedown_point
+    }
+    else {
+      this.dragged_model_offset = this.models[this.dragged_model].pos.sub(
+        mousedown_point
+      );
+    }
+  }
 
-  // public mousemove = (event: MouseEvent) => {
-  //   let mouse_point = this.point_from_event(event);
-  //   if (this.dragged_model != -1) {
-  //     let mouse_speed = new Vec(event.movementX, event.movementY);
-  //     let newpoint = this.point_from_event(event);
-  //     this.models[this.dragged_model].pos = newpoint.add(
-  //       this.dragged_model_offset
-  //     );
-  //     this.models[this.dragged_model].velocity = mouse_speed.mult(20);
-  //     this.draw();
-  //     return;
-  //   }
-  //   this.hover_model = this.find_model(mouse_point);
-  // }
+  public mousemove = (event: MouseEvent) => {
+    let mouse_point = this.point_from_event(event);
+    if (this.dragged_model != -1) {
+      let mouse_speed = new Vec(event.movementX, event.movementY);
+      let newpoint = this.point_from_event(event);
+      this.models[this.dragged_model].pos = newpoint.add(
+        this.dragged_model_offset
+      );
+      this.models[this.dragged_model].velocity = mouse_speed.mult(20);
+      this.draw();
+      return;
+    } else if(this.select_start) {
+        this.ctx.strokeStyle =  "black";
+        this.ctx.lineWidth = 10;
 
+        this.ctx.strokeRect(this.select_start.x, this.select_start.y, mouse_point.x - this.select_start.x, mouse_point.y - this.select_start.y)
+        this.ctx.lineWidth = 1;
+
+    }
+    this.hover_model = this.find_model(mouse_point);
+  }
+  public autolayout(){
+    const {width, height} = autolayout(this.models, this.springs)
+    
+    this.canvas.height = height + 300;
+    this.canvas.width = window.innerWidth  > width + 300 ? window.innerWidth : width + 300 ;
+  }
   public draw = () => {
     this.timer.mark_time();
-    this.animate();
+    this.simulate && this.animate();
     this.origin += 10;
     if (this.origin > 500) this.origin = 10;
     let ctx = this.ctx;
     if (ctx) {
-      ctx.canvas.width = window.innerWidth;
-      ctx.canvas.height = window.innerHeight;
+      // ctx.canvas.width = window.innerWidth;
+      // ctx.canvas.height = window.innerHeight;
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       ctx.fillStyle =  "rgb(244, 248, 250)";
       ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
       // Render Spring Connections
       ctx.strokeStyle =  "#808080";
-      ctx.setLineDash([4, 4]);
+      // ctx.setLineDash([4, 4]);
       this.springs.forEach((spring, i) => {
-        let a = this.models[spring.from_model_idx];
-        let b = this.models[spring.to_model_idx];
-        const start = a.center()
-        const end = b.center()
-
-        start.x = start.x + a.width/2
-        end.x = end.x - b.width/2
-
-        drawSpline(ctx, start, end)
-
-        // ctx.beginPath();
-        // ctx.moveTo(a.cx(), a.cy());
-        // ctx.lineTo(b.cx(), b.cy());
-        // ctx.stroke();
+        spring.render(ctx, this.models)
       })
       // Render Models
       this.models.forEach((model, i) => {
@@ -214,11 +214,19 @@ export class World {
       console.error("Canvas Context Not Found");
     }
   }
-
+  public toggleSimulation = (ev: KeyboardEvent) => {
+    if(ev.key === 's') {
+      this.simulate = !this.simulate
+    } else if(ev.key === "a"){
+      console.log("AutoLayout");
+      this.autolayout()
+    }
+  }
   public attach_handlers = () => {
-    // this.canvas.addEventListener("mouseup", this.mouseup, false);
-    // this.canvas.addEventListener("mousemove", this.mousemove, false);
-    // this.canvas.addEventListener("mousedown", this.mousedown, false);
+    this.canvas.addEventListener("mouseup", this.mouseup, false);
+    this.canvas.addEventListener("mousemove", this.mousemove, false);
+    this.canvas.addEventListener("mousedown", this.mousedown, false);
+    window.addEventListener("keydown", this.toggleSimulation, false)
     setInterval(this.draw, 30);
   }
 }
@@ -249,8 +257,8 @@ function calc_new_frame(
   function wall_power(p: Model) {
     let ans = new Vec();
     is_colide = false;
-    ans.x = wall_power2(p.center().x, p.width/2, width);
-    ans.y = wall_power2(p.center().y, p.height/2, height);
+    ans.x = wall_power2(p.pos.x, p.width, width);
+    ans.y = wall_power2(p.pos.y, p.height, height);
     if (is_colide) ans.sub_to(p.velocity.mult(10));
     return ans;
   }
@@ -263,8 +271,8 @@ function calc_new_frame(
 
     if (acc_x_dist > 20 || acc_y_dist > 20) return new Vec();
     let deltaV = p2.velocity.sub(p1.velocity);
-    let force_x = deltaV.x/ (acc_x_dist || 0.001);
-    let force_y = deltaV.y/(acc_y_dist  || 0.001);
+    let force_x = 1000/ (acc_x_dist || 0.001);
+    let force_y = 1000/(acc_y_dist  || 0.001);
     
     let npos1 = p1.center().div(dist);
     let npos2 = p2.center().div(dist);
@@ -275,13 +283,23 @@ function calc_new_frame(
     return ans;
   }
 
-  function calc_spring_power(p1: Model, p2: Model) {
-    let dist = p1.center().calc_dist(p2.center());
-    let deltaV = p2.velocity.sub(p1.velocity);
-    let force =  0.01* (dist - STRING_LEN);
-    let npos1 = p1.center().div(dist);
-    let npos2 = p2.center().div(dist);
-    force +=  0.01* deltaV.dot_mult(npos2.sub(npos1));
+  function calc_spring_power(spring: Spring) {
+    const factor = springs.reduce((acc,s, idx) => {
+      const from = s.from_model_idx === spring.from_model_idx || s.to_model_idx === spring.from_model_idx
+      const to =  s.from_model_idx === spring.to_model_idx || s.to_model_idx === spring.to_model_idx
+      if(from || to) acc +=1
+      return acc
+    }, 0)
+    const spring_len = STRING_LEN + 25 * factor
+    // console.log(`Factor ${factor}`);
+    const from_model = models[spring.from_model_idx];
+    const to_model = models[spring.to_model_idx];
+    let dist = from_model.center().calc_dist(to_model.center());
+    let deltaV = to_model.velocity.sub(from_model.velocity);
+    let force =  0.1* (dist - spring_len);
+    let npos1 = from_model.center().div(dist);
+    let npos2 = to_model.center().div(dist);
+    force +=  0.1* deltaV.dot_mult(npos2.sub(npos1));
     let ans = npos2.sub(npos1).mult(force);
     return ans;
   }
@@ -314,8 +332,8 @@ function calc_new_frame(
   }
 
   function far_away_fast_calc(p1: Vec, p2: Vec) {
-    if (far_away_fast_calc2(p1.x, p2.x, WIDTH/2)) return true;
-    if (far_away_fast_calc2(p1.y, p2.y, HEIGHT/2)) return true;
+    if (far_away_fast_calc2(p1.x, p2.x, 500)) return true;
+    if (far_away_fast_calc2(p1.y, p2.y, 500)) return true;
     return false;
   }
 
@@ -323,7 +341,7 @@ function calc_new_frame(
     //int i;
     let models = decode_models(y);
     let dmodels = [];
-    const DRAG = 0.1
+    const DRAG = 0.9
     let i;
     for (i = 0; i < num_models; i++) {
       let p = models[i];
@@ -338,7 +356,7 @@ function calc_new_frame(
      
       for (let j = i + 1; j < num_models; j++) {
         let p2 = models[j];
-        // if (far_away_fast_calc(p1.center(), p2.center())) continue;
+        if (far_away_fast_calc(p1.center(), p2.center())) continue;
         let dist_vect = p1.center().calc_dist_vec(p2.center());
         // let dist = p1.pos.calc_dist(p2.pos);
         let collide_power = calc_collide_power(p1, p2, dist_vect);
@@ -348,7 +366,7 @@ function calc_new_frame(
     }
     for (i = 0; i < springs.length; i++) {
       let s = springs[i];
-      let spring_power = calc_spring_power(models[s.from_model_idx], models[s.to_model_idx]);
+      let spring_power = calc_spring_power(s);
       dmodels[s.from_model_idx].velocity.add_to(spring_power);
       dmodels[s.to_model_idx].velocity.sub_to(spring_power);
     }

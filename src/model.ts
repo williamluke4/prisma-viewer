@@ -1,7 +1,7 @@
 import { Vec } from "./vector";
 import { DMMF } from '@prisma/generator-helper';
+import { FIELD_HEIGHT } from './constants';
 
-const FIELD_HEIGHT = 20;
 class ModelField{
   parent: Model;
   index: number;

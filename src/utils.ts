@@ -1,4 +1,5 @@
 import { Vec } from "./vector";
+import { FIELD_HEIGHT } from './constants';
 
 export function trim(x: number, min_value: number, max_value: number) {
   return Math.min(Math.max(x, min_value), max_value);
@@ -18,4 +19,7 @@ export function my_rand(min: number, max: number) {
   let r = Math.random();
   //r=r%1000;
   return r * (max - min) + min;
+}
+export function getFieldY(modelPos: Vec, field_idx: number){
+  return modelPos.y + (FIELD_HEIGHT * (field_idx + 1))
 }
