@@ -7,9 +7,10 @@
     "build:cli": "tsc -d",
     "build:web": "parcel build src/index.ts -d public",
     "build": "npm run build:cli && npm run build:web",
-    "dev:web":"parcel watch src/index.ts -d public",
-    "dev:cli":"ts-node ./src/bin.ts",
-    "dev": "npm run dev:web & npm run dev:cli"
+    "dev:web": "parcel watch src/index.ts -d public",
+    "dev:cli": "ts-node ./src/bin.ts",
+    "dev": "npm run dev:web & npm run dev:cli",
+    "release": "auto shipit"
   },
   "bin": {
     "pv": "dist/bin.js"
@@ -36,6 +37,8 @@
     "tslib": "^1.10.0"
   },
   "devDependencies": {
+    "@auto-it/conventional-commits": "^9.10.6",
+    "auto": "^9.10.6",
     "@types/dagre": "^0.7.42",
     "@types/lodash": "^4.14.149",
     "@zeit/ncc": "^0.20.5",

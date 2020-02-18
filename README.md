@@ -1,4 +1,6 @@
 # Prisma Viewer
+![npm](https://img.shields.io/npm/v/prisma-viewer)
+
 **🐉 Here be dragons!!**
 
 For use with [Prisma](https://www.prisma.io/) Datamodels
