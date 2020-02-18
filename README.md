@@ -1,4 +1,11 @@
 # Prisma Viewer
+**🐉 Here be dragons!!**
+
+## Installation
+
+```
+  npm i -g prisma-viewer
+```
 
 ## Usage
 
