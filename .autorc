@@ -1,6 +1,6 @@
 {
   "owner": "williamluke4",
-  "repo": "wims",
+  "repo": "prisma-viewer",
   "plugins": [
     "npm",
     "conventional-commits"
