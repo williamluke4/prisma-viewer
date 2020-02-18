@@ -1,6 +1,7 @@
 # Prisma Viewer
 **🐉 Here be dragons!!**
 
+For use with [Prisma](https://www.prisma.io/) Datamodels
 ## Installation
 
 ```
