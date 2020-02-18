@@ -1,7 +1,7 @@
 {
   "name": "prisma-viewer",
-  "version": "1.0.3",
-  "description": "Displays Prisma Datamodels",
+  "version": "1.0.4",
+  "description": "Displays Prisma Datamodels/Schemas",
   "main": "index.js",
   "scripts": {
     "build:cli": "tsc -d",

@@ -11,13 +11,26 @@ import { Server, IncomingMessage, ServerResponse } from 'http'
 
 const server: Fastify.FastifyInstance = Fastify({})
 
+function getSchemaPath(schemaPath?: string): string {
+  if(schemaPath && fs.existsSync(schemaPath)){
+    return schemaPath;
+  }
+  const paths = ["./schema.prisma", "./prisma/schema.prisma"]
+  for (const path of paths){
+    if (fs.existsSync(path)) {
+      return path
+    }
+  }
+  throw Error(chalk.red("Schema could not be found!"))
+}
+
 export class Run implements Command {
   static new(): Run {
     return new Run()
   }
   private constructor() {}
   async parse(args: string[]) {
-    const datamodelPath = args && args[0]
+    let datamodelPath = getSchemaPath(args && args[0])
     const dmmf = await getDMMF({datamodelPath})
     fs.writeFileSync(path.join(__dirname, '../../public/datamodel.json'), JSON.stringify(dmmf.datamodel), {encoding: 'utf8', flag: 'w' })
     console.log(chalk.green('Data Model Generated'));
