@@ -6,8 +6,10 @@ import * as fs from 'fs';
 import chalk from 'chalk';
 import { Command } from './helpers/types';
 import * as path from 'path';
-const Bundler = require('parcel-bundler');
-const app = require('express')();
+import Fastify from 'fastify';
+import { Server, IncomingMessage, ServerResponse } from 'http'
+
+const server: Fastify.FastifyInstance = Fastify({})
 
 export class Run implements Command {
   static new(): Run {
@@ -19,20 +21,28 @@ export class Run implements Command {
     const dmmf = await getDMMF({datamodelPath})
     fs.writeFileSync(path.join(__dirname, '../../public/datamodel.json'), JSON.stringify(dmmf.datamodel), {encoding: 'utf8', flag: 'w' })
     console.log(chalk.green('Data Model Generated'));
-    const file = path.join(__dirname, '../../../public/index.html'); // Pass an absolute path to the entrypoint here
-    console.log(file);
+    // Require the framework and instantiate it
+    server.register(require('fastify-static'), {
+      root: path.join(__dirname, '../../public'),
+      prefix: '/public/', // optional: default '/'
+    })
+    // Declare a route
+    server.get('/', async (request, reply) => {
+      (reply as any).sendFile('index.html') // serving path.join(__dirname, 'public', 'myHtml.html') directly
+    })
 
-
-    const options = {}; // See options section of api docs, for the possibilities
-
-    // Initialize a new bundler using a file and options
-    const bundler = new Bundler(file, options);
-
-    // Let express use the bundler middleware, this will let Parcel handle every request over your express server
-    app.use(bundler.middleware());
-
-    // Listen on port 8080
-    app.listen(8080);
+    // Run the server!
+    const start = async () => {
+      try {
+        await server.listen(3000)
+        let address = server.server.address();
+        address = typeof address === 'string' ? address : `${address?.address}:${address?.port}`
+        console.log(`Server listening on http://${address}`)
+      } catch (err) {
+        process.exit(1)
+      }
+    }
+    start()
     return ''
   }
 }
