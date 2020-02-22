@@ -21,7 +21,7 @@ function getSchemaPath(schemaPath?: string): string {
       return path
     }
   }
-  throw Error(chalk.red("Schema could not be found!"))
+  throw Error(chalk.red("✗ Schema could not be found!"))
 }
 
 export class Run implements Command {
@@ -33,8 +33,9 @@ export class Run implements Command {
     let datamodelPath = getSchemaPath(args && args[0])
     const dmmf = await getDMMF({datamodelPath})
     fs.writeFileSync(path.join(__dirname, '../../public/datamodel.json'), JSON.stringify(dmmf.datamodel), {encoding: 'utf8', flag: 'w' })
-    console.log(chalk.green('Data Model Generated'));
+    console.log(chalk.green('✔ Data Model Generated'));
     // Require the framework and instantiate it
+
     server.register(require('fastify-static'), {
       root: path.join(__dirname, '../../public'),
       prefix: '/public/', // optional: default '/'

@@ -81,7 +81,7 @@ export class World {
           const from_field_idx = fieldIdx
           const to_model_idx = this.datamodel.models.findIndex(m => m.name === field.type)
           const to_model = this.datamodel.models[to_model_idx]
-          const to_field_idx = to_model.fields.findIndex(f => field.relationName === f.relationName)
+          const to_field_idx = to_model.fields.findIndex(f => field.relationName === f.relationName && f.name !== field.name)
           if(to_model_idx !==  -1) connections.push(new Spring(from_model_idx, to_model_idx, from_field_idx, to_field_idx))
           
         }
@@ -151,8 +151,9 @@ export class World {
       this.draw();
       return;
     } else if(this.select_start && this.ctx) {
+        // This Only Renders when the mouse is being moved
         this.ctx.strokeStyle =  "black";
-        this.ctx.lineWidth = 10;
+        this.ctx.lineWidth = 1;
         this.ctx.strokeRect(this.select_start.x, this.select_start.y, mouse_point.x - this.select_start.x, mouse_point.y - this.select_start.y)
         this.ctx.lineWidth = 1;
 

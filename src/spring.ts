@@ -4,14 +4,13 @@ import { getFieldY } from './utils';
 import { FIELD_HEIGHT, STRING_LEN } from './constants';
 
 export function drawSpline(ctx: CanvasRenderingContext2D ,start: Vec, end: Vec){
-
   const dist =  start.calc_dist(end)
   ctx.beginPath()
   ctx.moveTo(start.x || 0, start.y || 0)
   ctx.bezierCurveTo(
-    start.x + dist * 0.9 || 0, // cp1 x
+    start.x + dist * 0.4 || 0, // cp1 x
     start.y || 0, // cp1 y
-    end.x - dist * 0.9 || 0, // cp2 x
+    end.x - dist * 0.4 || 0, // cp2 x
     end.y || 0, // cp2 y
     end.x || 0, // end x
     end.y || 0

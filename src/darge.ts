@@ -28,11 +28,9 @@ export function autolayout(models: Model[], connections: Spring[]){
   })
   dagre.layout(g)
   g.nodes().forEach(v =>  {
-    //Node kbacon: {"label":"Kevin Bacon","width":121,"height":100,"x":264,"y":350}
     const node = g.node(v)
     const pos = new Vec(node.x, node.y)
     models[parseInt(v)].pos = pos
-    // console.log("Node " + v + ": " + JSON.stringify(g.node(v)));
   });
   const graph = g.graph()
   if(selection === 4){

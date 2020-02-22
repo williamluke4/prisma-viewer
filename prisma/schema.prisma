@@ -13,6 +13,8 @@ model User {
   phone              String
   responseRate       Float?
   responseTime       Int?
+  ReportsTo  User?  @relation("EmployeeToEmployee_ReportsTo")
+  employees         User[] @relation("EmployeeToEmployee_ReportsTo")
   isSuperHost        Boolean
   ownedPlaces        Place[]
   location           Location?
