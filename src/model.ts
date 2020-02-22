@@ -5,13 +5,17 @@ import { FIELD_HEIGHT } from './constants';
 class ModelField{
   parent: Model;
   index: number;
-  type: string;
-  name: string;
-  constructor(parent: Model, index: number, name: string, type: string) {
+  field: DMMF.Field;
+  constructor(parent: Model, index: number, field: DMMF.Field) {
     this.parent = parent;
     this.index = index;
-    this.name = name;
-    this.type = type;
+    this.field = field;
+  }
+  getFieldType(){
+    const typename = this.field.type
+    const isList = this.field.isList ? '[ ]' : ''
+    const isRequired = this.field.isRequired ? '' : '?'
+    return typename + isRequired + isList;
   }
   public render(ctx: CanvasRenderingContext2D){
     ctx.fillStyle = "white";
@@ -24,9 +28,9 @@ class ModelField{
     ctx.arc(this.parent.pos.x + 10, textY - 2.5, 3, 0, Math.PI * 2, true);
     ctx.fill()
     ctx.fillStyle = "black";
-    ctx.fillText(this.name, this.parent.pos.x + 20, textY );
+    ctx.fillText(this.field.name, this.parent.pos.x + 20, textY );
     ctx.textAlign = "right";
-    ctx.fillText(this.type, this.parent.pos.x + this.parent.width - 10, textY);
+    ctx.fillText(this.getFieldType(), this.parent.pos.x + this.parent.width - 10, textY);
 
   }
 }
@@ -93,7 +97,7 @@ export class Model {
     ctx.fillStyle = "white";
     ctx.rect(this.pos.x, this.pos.y + 20, this.width, this.height - 20)
     this.model.fields.forEach((field, i) => {
-      const f = new ModelField(this, i +1,field.name, field.type)
+      const f = new ModelField(this, i +1, field)
       f.render(ctx);
     })
   }
