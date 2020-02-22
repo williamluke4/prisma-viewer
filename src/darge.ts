@@ -1,12 +1,12 @@
 import * as dagre from 'dagre';
 import { Model } from './model';
-import { Spring } from './spring';
+import { Connection } from './connection';
 import { Vec } from './vector';
 
 
 const type = ["LR", "RL", "TB", "BT"]
 let selection = 0
-export function autolayout(models: Model[], connections: Spring[]){
+export function autolayout(models: Model[], connections: Connection[]){
   const g = new dagre.graphlib.Graph();
   
   // Set an object for the graph label

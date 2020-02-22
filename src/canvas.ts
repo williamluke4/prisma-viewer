@@ -1,15 +1,16 @@
 /*globals _:false */
 "use strict";
 
-import { Vec } from "./vector";
-import { chain } from "lodash";
-import { Timer } from "./timer";
-import { my_rand, dist } from "./utils";
-import { Spring } from "./spring";
-import { STRING_LEN, NUM_STEPS } from "./constants";
-import { Model } from './model';
 import { DMMF } from '@prisma/generator-helper';
+import { chain } from "lodash";
 import { autolayout } from './darge';
+import { Model } from './model';
+import { Connection } from "./connection";
+import { Timer } from "./timer";
+import { dist, my_rand } from "./utils";
+import { Vec } from "./vector";
+
+
 
 const WIDTH = 100
 const HEIGHT = 120
@@ -24,11 +25,11 @@ interface MyTouch {
   last_pos: Vec;
 }
 
-export class World {
+export class Canvas {
   origin: number;
   models:  Model[];
   radius: number;
-  springs: Spring[];
+  connections: Connection[];
   canvas: HTMLCanvasElement;
   timer: Timer;
   hover_model: number;
@@ -48,7 +49,7 @@ export class World {
     this.timer.mark_time();
     this.models = [] ;
     this.radius = 40;
-    this.springs = []
+    this.connections = []
     this.datamodel = datamodel
     this.canvas = document.getElementById(canvasid) as HTMLCanvasElement;
     this.ctx = this.canvas.getContext("2d")
@@ -71,7 +72,7 @@ export class World {
   }
   public loadSprings(){
     const loadedRelations: string [] = []
-    const connections:  Spring[] = []
+    const connections:  Connection[] = []
 
     this.datamodel.models.forEach((model: DMMF.Model, i: number) => {
       model.fields.forEach((field: DMMF.Field, fieldIdx: number) => {
@@ -82,7 +83,7 @@ export class World {
           const to_model_idx = this.datamodel.models.findIndex(m => m.name === field.type)
           const to_model = this.datamodel.models[to_model_idx]
           const to_field_idx = to_model.fields.findIndex(f => field.relationName === f.relationName && f.name !== field.name)
-          if(to_model_idx !==  -1) connections.push(new Spring(from_model_idx, to_model_idx, from_field_idx, to_field_idx))
+          if(to_model_idx !==  -1) connections.push(new Connection(from_model_idx, to_model_idx, from_field_idx, to_field_idx))
           
         }
       })
@@ -90,7 +91,7 @@ export class World {
     return connections;
   }
   public init_world = () => {
-    this.springs = this.loadSprings()
+    this.connections = this.loadSprings()
     for (let i = 0; i < this.datamodel.models.length; i++) {
       const prismaModel = this.datamodel.models[i]
       const ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D
@@ -161,7 +162,7 @@ export class World {
     this.hover_model = this.find_model(mouse_point);
   }
   public auto(){
-    const dims = autolayout(this.models, this.springs)
+    const dims = autolayout(this.models, this.connections)
     console.log("dim", dims);
     if(dims.width && dims.height){
       console.log("Setting");
@@ -184,12 +185,12 @@ export class World {
       // Render Spring Connections
       ctx.strokeStyle =  "#808080";
       // ctx.setLineDash([4, 4]);
-      this.springs.forEach((spring, i) => {
-        spring.render(ctx as CanvasRenderingContext2D, this.models)
+      this.connections.forEach((spring, i) => {
+        spring.draw(ctx as CanvasRenderingContext2D, this.models)
       })
       // Render Models
       this.models.forEach((model, i) => {
-        model.render(ctx as CanvasRenderingContext2D, this.hover_model === i, this.dragged_model === i)
+        model.draw(ctx as CanvasRenderingContext2D, this.hover_model === i, this.dragged_model === i)
       })
       
 
