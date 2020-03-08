@@ -3,30 +3,73 @@
 <script type="text/javascript" src="./public/index.js"></script>
 
 <style>
-html, body {
-  width:  100%;
-  height: 100%;
-  background-color: #f4f8fa;
-  margin: 0px;
-}
-#editor {
-  position: fixed;
-  top:0;left:98vw;bottom: 0;
-  width: 50%;
-  height: 100vh;
-  transition: left 0.2s ease-in-out;
-}
-#editor:hover {
-  width: 50%;
-  left: calc(100vw - 50%);
-}
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f8fa;
+    margin: 0px;
+  }
+
+  .editor-container {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 98vw;
+    bottom: 0;
+    width: 50%;
+    height: 100vh;
+    transition: left 0.2s ease-in-out;
+  }
+
+  .editor-container:hover {
+    width: 50%;
+    left: calc(100vw - 50%);
+  }
+
+  #editor {
+    flex-grow: 1;
+    width: 100%;
+  }
+
+  .button-container {
+    width: 100%;
+    background: #232323;
+    height: 50px;
+  }
+
+  .button {
+    margin: 8px;
+    width: calc(100% - 25px);
+    background: #43bc76;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    border: 4px solid #43bc76;
+  }
+
+  .button:hover {
+    background: white;
+    color: #43bc76;
+    font-weight: 600;
+    border: 4px solid white;
+  }
 </style>
 
 <body>
-  <div id="editor"></div>
-  <canvas id="canvas" width="1000" height="500"></canvas>
+  <div class="editor-container">
+    <div id="editor"></div>
+    <div class="button-container">
+      <button id="generate" class="button">Generate</button>
+    </div>
+  </div>
+  <div id="canvas-container" tabindex="0">
+    <canvas id="canvas" width="100vw" height="100vh"></canvas>
+  </div>
 </body>
+
 </html>
 <script>
-  
+
 </script>

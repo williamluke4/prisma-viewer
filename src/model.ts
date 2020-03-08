@@ -56,7 +56,6 @@ class ModelHeader{
   }
   public draw(ctx: CanvasRenderingContext2D){
     ctx.fillStyle = "white";
-    // console.log(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.parent.height);
     ctx.fillRect(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.parent.height)
     ctx.fillStyle = "#15BD76";
     ctx.fillRect(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.height)
