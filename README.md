@@ -1,14 +1,15 @@
-# Prisma Viewer
 
 <p align="center">
-  <img width="100%" height="auto" src="banner.png">
+  <img style="border-radius: 8px;" width="100%" height="auto" src="viewer.png">
 </p>
+
+<h1 align="center">Prisma Viewer</h1>
 <p align="center">
  <a href="https://www.npmjs.com/package/prisma-viewer">
-  <img src="https://img.shields.io/npm/v/prisma-viewer/latest?style=for-the-badge"/>
+  <img style="padding: 0px 8px;" src="https://img.shields.io/npm/v/prisma-viewer/latest?style=for-the-badge"/>
   </a>
     <a href="https://www.npmjs.com/package/prisma-viewer">
-    <img src="https://img.shields.io/npm/v/prisma-viewer/canary?color=orange&style=for-the-badge"/>
+    <img style="padding: 0px 8px;" src="https://img.shields.io/npm/v/prisma-viewer/canary?color=orange&style=for-the-badge"/>
     </a>
 </p>
 
