@@ -1,6 +1,6 @@
 {
   "name": "prisma-viewer",
-  "version": "1.1.0",
+  "version": "1.1.1-canary.305169b.0",
   "description": "Displays Prisma Datamodels/Schemas",
   "main": "index.js",
   "scripts": {
