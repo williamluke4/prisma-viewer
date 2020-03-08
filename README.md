@@ -25,7 +25,7 @@ For use with [Prisma](https://www.prisma.io/) Datamodels
 
 canary
 
-## Usage
+## Usage CLI
 
 ```
     Prisma Viewer   ಠ_ಠ
@@ -39,6 +39,8 @@ canary
       $ pv
       $ pv ./schema.prisma
 ```
+
+## Usage Playground
 
 When viewing the schema/datamodel:
 - Press the `a` key to change the layout
