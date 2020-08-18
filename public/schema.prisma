@@ -1,334 +1,3079 @@
-generator photon {
-  provider = "photonjs"
+generator client {
+  provider = "prisma-client-js"
 }
 
-model User {
-  id                 String           @default(cuid()) @id
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-  firstName          String
-  lastName           String
-  email              String           @unique
-  password           String
-  phone              String
-  responseRate       Float?
-  responseTime       Int?
-  ReportsTo  User?  @relation("EmployeeToEmployee_ReportsTo")
-  employees         User[] @relation("EmployeeToEmployee_ReportsTo")
-  isSuperHost        Boolean
-  ownedPlaces        Place[]
-  location           Location?
-  bookings           Booking[]
-  paymentAccount     PaymentAccount[]
-  sentMessages       Message[]        @relation("SentMessages")
-  receivedMessages   Message[]        @relation("ReceivedMessages")
-  notifications      Notification[]
-  profilePicture     Picture?
-  hostingExperiences Experience[]
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://prisma:prisma@localhost:5434/gitlab?schema=public"
 }
 
-model Place {
-  id                String             @default(cuid()) @id
-  name              String
-  size              PLACE_SIZES?
-  shortDescription  String
-  description       String
-  slug              String
-  maxGuests         Int
-  numBedrooms       Int
-  numBeds           Int
-  numBaths          Int
-  reviews           Review[]
-  amenities         Amenities
-  host              User
-  pricing           Pricing
-  location          Location
-  views             Views
-  guestRequirements GuestRequirements?
-  policies          Policies?
-  houseRules        HouseRules?
-  bookings          Booking[]
-  pictures          Picture[]
-  popularity        Int
+model abuse_reports {
+  id                      Int       @default(autoincrement()) @id
+  reporter_id             Int?
+  user_id                 Int?
+  message                 String?
+  created_at              DateTime?
+  updated_at              DateTime?
+  message_html            String?
+  cached_markdown_version Int?
 }
 
-model Pricing {
-  id              String    @default(cuid()) @id
-  place           Place
-  monthlyDiscount Int?
-  weeklyDiscount  Int?
-  perNight        Int
-  smartPricing    Boolean
-  basePrice       Int
-  averageWeekly   Int
-  averageMonthly  Int
-  cleaningFee     Int?
-  securityDeposit Int?
-  extraGuests     Int?
-  weekendPricing  Int?
-  currency        CURRENCY?
+model appearances {
+  id                              Int      @default(autoincrement()) @id
+  title                           String
+  description                     String
+  header_logo                     String?
+  logo                            String?
+  created_at                      DateTime
+  updated_at                      DateTime
+  description_html                String?
+  cached_markdown_version         Int?
+  new_project_guidelines          String?
+  new_project_guidelines_html     String?
+  header_message                  String?
+  header_message_html             String?
+  footer_message                  String?
+  footer_message_html             String?
+  message_background_color        String?
+  message_font_color              String?
+  favicon                         String?
+  email_header_and_footer_enabled Boolean  @default(false)
 }
 
-model GuestRequirements {
-  id                            String  @default(cuid()) @id
-  govIssuedId                   Boolean
-  recommendationsFromOtherHosts Boolean
-  guestTripInformation          Boolean
-  place                         Place
+model application_settings {
+  id                                             Int       @default(autoincrement()) @id
+  default_projects_limit                         Int?
+  signup_enabled                                 Boolean?
+  gravatar_enabled                               Boolean?
+  sign_in_text                                   String?
+  created_at                                     DateTime?
+  updated_at                                     DateTime?
+  home_page_url                                  String?
+  default_branch_protection                      Int?      @default(2)
+  restricted_visibility_levels                   String?
+  version_check_enabled                          Boolean?  @default(true)
+  max_attachment_size                            Int       @default(10)
+  default_project_visibility                     Int?
+  default_snippet_visibility                     Int?
+  domain_whitelist                               String?
+  user_oauth_applications                        Boolean?  @default(true)
+  after_sign_out_path                            String?
+  session_expire_delay                           Int       @default(10080)
+  import_sources                                 String?
+  help_page_text                                 String?
+  admin_notification_email                       String?
+  shared_runners_enabled                         Boolean   @default(true)
+  max_artifacts_size                             Int       @default(100)
+  runners_registration_token                     String?
+  max_pages_size                                 Int       @default(100)
+  require_two_factor_authentication              Boolean?  @default(false)
+  two_factor_grace_period                        Int?      @default(48)
+  metrics_enabled                                Boolean?  @default(false)
+  metrics_host                                   String?   @default("localhost")
+  metrics_pool_size                              Int?      @default(16)
+  metrics_timeout                                Int?      @default(10)
+  metrics_method_call_threshold                  Int?      @default(10)
+  recaptcha_enabled                              Boolean?  @default(false)
+  recaptcha_site_key                             String?
+  recaptcha_private_key                          String?
+  metrics_port                                   Int?      @default(8089)
+  akismet_enabled                                Boolean?  @default(false)
+  akismet_api_key                                String?
+  metrics_sample_interval                        Int?      @default(15)
+  sentry_enabled                                 Boolean?  @default(false)
+  sentry_dsn                                     String?
+  email_author_in_body                           Boolean?  @default(false)
+  default_group_visibility                       Int?
+  repository_checks_enabled                      Boolean?  @default(false)
+  shared_runners_text                            String?
+  metrics_packet_size                            Int?      @default(1)
+  disabled_oauth_sign_in_sources                 String?
+  health_check_access_token                      String?
+  send_user_confirmation_email                   Boolean?  @default(false)
+  container_registry_token_expire_delay          Int?      @default(5)
+  after_sign_up_text                             String?
+  user_default_external                          Boolean   @default(false)
+  repository_storages                            String?   @default("default")
+  enabled_git_access_protocol                    String?
+  domain_blacklist_enabled                       Boolean?  @default(false)
+  domain_blacklist                               String?
+  usage_ping_enabled                             Boolean   @default(true)
+  sign_in_text_html                              String?
+  help_page_text_html                            String?
+  shared_runners_text_html                       String?
+  after_sign_up_text_html                        String?
+  rsa_key_restriction                            Int       @default(0)
+  dsa_key_restriction                            Int       @default(dbgenerated())
+  ecdsa_key_restriction                          Int       @default(0)
+  ed25519_key_restriction                        Int       @default(0)
+  housekeeping_enabled                           Boolean   @default(true)
+  housekeeping_bitmaps_enabled                   Boolean   @default(true)
+  housekeeping_incremental_repack_period         Int       @default(10)
+  housekeeping_full_repack_period                Int       @default(50)
+  housekeeping_gc_period                         Int       @default(200)
+  html_emails_enabled                            Boolean?  @default(true)
+  plantuml_url                                   String?
+  plantuml_enabled                               Boolean?
+  terminal_max_session_time                      Int       @default(0)
+  unique_ips_limit_per_user                      Int?
+  unique_ips_limit_time_window                   Int?
+  unique_ips_limit_enabled                       Boolean   @default(false)
+  default_artifacts_expire_in                    String    @default("0")
+  uuid                                           String?
+  polling_interval_multiplier                    Float     @default(1.0)
+  cached_markdown_version                        Int?
+  clientside_sentry_enabled                      Boolean   @default(false)
+  clientside_sentry_dsn                          String?
+  prometheus_metrics_enabled                     Boolean   @default(true)
+  help_page_hide_commercial_content              Boolean?  @default(false)
+  help_page_support_url                          String?
+  performance_bar_allowed_group_id               Int?
+  hashed_storage_enabled                         Boolean   @default(false)
+  project_export_enabled                         Boolean   @default(true)
+  auto_devops_enabled                            Boolean   @default(true)
+  throttle_unauthenticated_enabled               Boolean   @default(false)
+  throttle_unauthenticated_requests_per_period   Int       @default(3600)
+  throttle_unauthenticated_period_in_seconds     Int       @default(3600)
+  throttle_authenticated_api_enabled             Boolean   @default(false)
+  throttle_authenticated_api_requests_per_period Int       @default(7200)
+  throttle_authenticated_api_period_in_seconds   Int       @default(3600)
+  throttle_authenticated_web_enabled             Boolean   @default(false)
+  throttle_authenticated_web_requests_per_period Int       @default(7200)
+  throttle_authenticated_web_period_in_seconds   Int       @default(3600)
+  password_authentication_enabled_for_web        Boolean?
+  password_authentication_enabled_for_git        Boolean?  @default(true)
+  gitaly_timeout_default                         Int       @default(55)
+  gitaly_timeout_medium                          Int       @default(30)
+  gitaly_timeout_fast                            Int       @default(10)
+  authorized_keys_enabled                        Boolean   @default(true)
+  auto_devops_domain                             String?
+  pages_domain_verification_enabled              Boolean   @default(true)
+  user_default_internal_regex                    String?
+  allow_local_requests_from_hooks_and_services   Boolean   @default(false)
+  enforce_terms                                  Boolean?  @default(false)
+  mirror_available                               Boolean   @default(true)
+  hide_third_party_offers                        Boolean   @default(false)
+  instance_statistics_visibility_private         Boolean   @default(false)
+  web_ide_clientside_preview_enabled             Boolean   @default(false)
+  user_show_add_ssh_key_message                  Boolean   @default(true)
+  usage_stats_set_by_user_id                     Int?
+  receive_max_input_size                         Int?
+  diff_max_patch_bytes                           Int       @default(102400)
+  archive_builds_in_seconds                      Int?
+  commit_email_hostname                          String?
+  protected_ci_variables                         Boolean   @default(false)
+  runners_registration_token_encrypted           String?
+  local_markdown_version                         Int       @default(0)
+  first_day_of_week                              Int       @default(0)
+  default_project_creation                       Int       @default(2)
+  external_authorization_service_enabled         Boolean   @default(false)
+  external_authorization_service_url             String?
+  external_authorization_service_default_label   String?
+  external_authorization_service_timeout         Float?    @default(0.5)
+  external_auth_client_cert                      String?
+  encrypted_external_auth_client_key             String?
+  encrypted_external_auth_client_key_iv          String?
+  encrypted_external_auth_client_key_pass        String?
+  encrypted_external_auth_client_key_pass_iv     String?
+  lets_encrypt_notification_email                String?
+  lets_encrypt_terms_of_service_accepted         Boolean   @default(false)
+  elasticsearch_shards                           Int       @default(5)
+  elasticsearch_replicas                         Int       @default(1)
+  encrypted_lets_encrypt_private_key             String?
+  encrypted_lets_encrypt_private_key_iv          String?
+  dns_rebinding_protection_enabled               Boolean   @default(true)
+  default_project_deletion_protection            Boolean   @default(false)
+  users                                          users?    @relation(fields: [usage_stats_set_by_user_id], references: [id])
+
+  @@index([usage_stats_set_by_user_id], name: "index_application_settings_on_usage_stats_set_by_user_id")
 }
 
-model Policies {
-  id               String   @default(cuid()) @id
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  checkInStartTime Float
-  checkInEndTime   Float
-  checkoutTime     Float
-  place            Place
+model application_setting_terms {
+  id                      Int               @default(autoincrement()) @id
+  cached_markdown_version Int?
+  terms                   String
+  terms_html              String?
+  term_agreements         term_agreements[]
+  users                   users[]
 }
 
-model HouseRules {
-  id                      String   @default(cuid()) @id
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-  suitableForChildren     Boolean?
-  suitableForInfants      Boolean?
-  petsAllowed             Boolean?
-  smokingAllowed          Boolean?
-  partiesAndEventsAllowed Boolean?
-  additionalRules         String?
+model ar_internal_metadata {
+  key        String   @id
+  value      String?
+  created_at DateTime
+  updated_at DateTime
 }
 
-model Views {
-  id       String @default(cuid()) @id
-  lastWeek Int
-  place    Place
+model audit_events {
+  id          Int       @default(autoincrement()) @id
+  author_id   Int
+  type        String
+  entity_id   Int
+  entity_type String
+  details     String?
+  created_at  DateTime?
+  updated_at  DateTime?
+
+  @@index([entity_id, entity_type], name: "index_audit_events_on_entity_id_and_entity_type")
 }
 
-model Location {
-  id            String         @default(cuid()) @id
-  lat           Float
-  lng           Float
-  neighbourHood Neighbourhood?
-  user          User?
-  place         Place?
-  address       String
-  directions    String
-  experience    Experience?
-  restaurant    Restaurant?
+model award_emoji {
+  id             Int       @default(autoincrement()) @id
+  name           String?
+  user_id        Int?
+  awardable_id   Int?
+  awardable_type String?
+  created_at     DateTime?
+  updated_at     DateTime?
+
+  @@index([awardable_type, awardable_id], name: "index_award_emoji_on_awardable_type_and_awardable_id")
+  @@index([user_id, name], name: "index_award_emoji_on_user_id_and_name")
 }
 
-model Neighbourhood {
-  id          String     @default(cuid()) @id
-  locations   Location[]
-  name        String
-  slug        String
-  homePreview Picture?
-  city        City
-  featured    Boolean
-  popularity  Int
+model badges {
+  id         Int         @default(autoincrement()) @id
+  link_url   String
+  image_url  String
+  project_id Int?
+  group_id   Int?
+  type       String
+  created_at DateTime
+  updated_at DateTime
+  namespaces namespaces? @relation(fields: [group_id], references: [id])
+  projects   projects?   @relation(fields: [project_id], references: [id])
+
+  @@index([group_id], name: "index_badges_on_group_id")
+  @@index([project_id], name: "index_badges_on_project_id")
 }
 
-model City {
-  id             String          @default(cuid()) @id
-  name           String
-  neighbourhoods Neighbourhood[]
+model board_group_recent_visits {
+  id         Int         @default(autoincrement()) @id
+  created_at DateTime
+  updated_at DateTime
+  user_id    Int?
+  board_id   Int?
+  group_id   Int?
+  boards     boards?     @relation(fields: [board_id], references: [id])
+  namespaces namespaces? @relation(fields: [group_id], references: [id])
+  users      users?      @relation(fields: [user_id], references: [id])
+
+  @@index([board_id], name: "index_board_group_recent_visits_on_board_id")
+  @@index([group_id], name: "index_board_group_recent_visits_on_group_id")
+  @@index([user_id], name: "index_board_group_recent_visits_on_user_id")
+  @@unique([user_id, group_id, board_id], name: "index_board_group_recent_visits_on_user_group_and_board")
 }
 
-model Picture {
-  id  String @default(cuid()) @id
-  url String
+model board_project_recent_visits {
+  id         Int       @default(autoincrement()) @id
+  created_at DateTime
+  updated_at DateTime
+  user_id    Int?
+  project_id Int?
+  board_id   Int?
+  boards     boards?   @relation(fields: [board_id], references: [id])
+  projects   projects? @relation(fields: [project_id], references: [id])
+  users      users?    @relation(fields: [user_id], references: [id])
+
+  @@index([board_id], name: "index_board_project_recent_visits_on_board_id")
+  @@index([project_id], name: "index_board_project_recent_visits_on_project_id")
+  @@index([user_id], name: "index_board_project_recent_visits_on_user_id")
+  @@unique([user_id, project_id, board_id], name: "index_board_project_recent_visits_on_user_project_and_board")
 }
 
-model Experience {
-  id             String              @default(cuid()) @id
-  category       ExperienceCategory?
-  title          String
-  host           User
-  location       Location
-  pricePerPerson Int
-  reviews        Review[]
-  preview        Picture
-  popularity     Int
+model boards {
+  id                          Int                           @default(autoincrement()) @id
+  project_id                  Int?
+  created_at                  DateTime
+  updated_at                  DateTime
+  group_id                    Int?
+  namespaces                  namespaces?                   @relation(fields: [group_id], references: [id])
+  projects                    projects?                     @relation(fields: [project_id], references: [id])
+  board_group_recent_visits   board_group_recent_visits[]
+  board_project_recent_visits board_project_recent_visits[]
+  lists                       lists[]
+
+  @@index([group_id], name: "index_boards_on_group_id")
+  @@index([project_id], name: "index_boards_on_project_id")
 }
 
-model ExperienceCategory {
-  id         String      @default(cuid()) @id
-  mainColor  String
+model broadcast_messages {
+  id                      Int      @default(autoincrement()) @id
+  message                 String
+  starts_at               DateTime
+  ends_at                 DateTime
+  created_at              DateTime
+  updated_at              DateTime
+  color                   String?
+  font                    String?
+  message_html            String
+  cached_markdown_version Int?
+
+  @@index([starts_at, ends_at, id], name: "index_broadcast_messages_on_starts_at_and_ends_at_and_id")
+}
+
+model chat_names {
+  id                    Int                     @default(autoincrement()) @id
+  user_id               Int
+  service_id            Int
+  team_id               String
+  team_domain           String?
+  chat_id               String
+  chat_name             String?
+  last_used_at          DateTime?
+  created_at            DateTime
+  updated_at            DateTime
+  ci_pipeline_chat_data ci_pipeline_chat_data[]
+
+  @@unique([service_id, team_id, chat_id], name: "index_chat_names_on_service_id_and_team_id_and_chat_id")
+  @@unique([user_id, service_id], name: "index_chat_names_on_user_id_and_service_id")
+}
+
+model chat_teams {
+  id           Int        @default(autoincrement()) @id
+  namespace_id Int        @unique
+  team_id      String?
+  name         String?
+  created_at   DateTime
+  updated_at   DateTime
+  namespaces   namespaces @relation(fields: [namespace_id], references: [id])
+}
+
+model ci_builds {
+  id                                                       Int                       @default(autoincrement()) @id
+  status                                                   String?
+  finished_at                                              DateTime?
+  trace                                                    String?
+  created_at                                               DateTime?
+  updated_at                                               DateTime?
+  started_at                                               DateTime?
+  runner_id                                                Int?
+  coverage                                                 Float?
+  commit_id                                                Int?
+  commands                                                 String?
+  name                                                     String?
+  options                                                  String?
+  allow_failure                                            Boolean                   @default(false)
+  stage                                                    String?
+  trigger_request_id                                       Int?
+  stage_idx                                                Int?
+  tag                                                      Boolean?
+  ref                                                      String?
+  user_id                                                  Int?
+  type                                                     String?
+  target_url                                               String?
+  description                                              String?
+  artifacts_file                                           String?
+  project_id                                               Int?
+  artifacts_metadata                                       String?
+  erased_by_id                                             Int?
+  erased_at                                                DateTime?
+  artifacts_expire_at                                      DateTime?
+  environment                                              String?
+  artifacts_size                                           Int?
+  when                                                     String?
+  yaml_variables                                           String?
+  queued_at                                                DateTime?
+  token                                                    String?                   @unique
+  lock_version                                             Int?
+  coverage_regex                                           String?
+  auto_canceled_by_id                                      Int?
+  retried                                                  Boolean?
+  stage_id                                                 Int?
+  artifacts_file_store                                     Int?
+  artifacts_metadata_store                                 Int?
+  protected                                                Boolean?
+  failure_reason                                           Int?
+  scheduled_at                                             DateTime?
+  token_encrypted                                          String?                   @unique
+  ci_pipelines_ci_builds_auto_canceled_by_idToci_pipelines ci_pipelines?             @relation("ci_builds_auto_canceled_by_idToci_pipelines", fields: [auto_canceled_by_id], references: [id])
+  ci_pipelines_ci_builds_commit_idToci_pipelines           ci_pipelines?             @relation("ci_builds_commit_idToci_pipelines", fields: [commit_id], references: [id])
+  projects                                                 projects?                 @relation(fields: [project_id], references: [id])
+  ci_stages                                                ci_stages?                @relation(fields: [stage_id], references: [id])
+  ci_builds_metadata                                       ci_builds_metadata?
+  ci_builds_runner_session                                 ci_builds_runner_session?
+  ci_build_trace_chunks                                    ci_build_trace_chunks[]
+  ci_build_trace_sections                                  ci_build_trace_sections[]
+  ci_job_artifacts                                         ci_job_artifacts[]
+
+  @@index([artifacts_expire_at], name: "index_ci_builds_on_artifacts_expire_at")
+  @@index([auto_canceled_by_id], name: "index_ci_builds_on_auto_canceled_by_id")
+  @@index([commit_id, artifacts_expire_at, id], name: "index_ci_builds_on_commit_id_and_artifacts_expireatandidpartial")
+  @@index([commit_id, stage_idx, created_at], name: "index_ci_builds_on_commit_id_and_stage_idx_and_created_at")
+  @@index([commit_id, status, type], name: "index_ci_builds_on_commit_id_and_status_and_type")
+  @@index([commit_id, type, name, ref], name: "index_ci_builds_on_commit_id_and_type_and_name_and_ref")
+  @@index([commit_id, type, ref], name: "index_ci_builds_on_commit_id_and_type_and_ref")
+  @@index([project_id, id], name: "index_ci_builds_on_project_id_and_id")
+  @@index([protected], name: "index_ci_builds_on_protected")
+  @@index([queued_at], name: "index_ci_builds_on_queued_at")
+  @@index([runner_id], name: "index_ci_builds_on_runner_id")
+  @@index([stage_id], name: "index_ci_builds_on_stage_id")
+  @@index([status, type, runner_id], name: "index_ci_builds_on_status_and_type_and_runner_id")
+  @@index([updated_at], name: "index_ci_builds_on_updated_at")
+  @@index([user_id], name: "index_ci_builds_on_user_id")
+  @@index([project_id, status], name: "index_ci_builds_project_id_and_status_for_live_jobs_partial2")
+  @@index([scheduled_at], name: "partial_index_ci_builds_on_scheduled_at_with_scheduled_jobs")
+  @@index([stage_id, stage_idx], name: "tmp_build_stage_position_index")
+}
+
+model ci_builds_metadata {
+  id               Int       @default(autoincrement()) @id
+  build_id         Int       @unique
+  project_id       Int
+  timeout          Int?
+  timeout_source   Int       @default(1)
+  config_options   Json?
+  config_variables Json?
+  ci_builds        ci_builds @relation(fields: [build_id], references: [id])
+  projects         projects  @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_ci_builds_metadata_on_project_id")
+}
+
+model ci_builds_runner_session {
+  id            Int       @default(autoincrement()) @id
+  build_id      Int       @unique
+  url           String
+  certificate   String?
+  authorization String?
+  ci_builds     ci_builds @relation(fields: [build_id], references: [id])
+}
+
+model ci_build_trace_chunks {
+  id          Int       @default(autoincrement()) @id
+  build_id    Int
+  chunk_index Int
+  data_store  Int
+  // This type is currently not supported.
+  // raw_data binary?
+  ci_builds   ci_builds @relation(fields: [build_id], references: [id])
+
+  @@unique([build_id, chunk_index], name: "index_ci_build_trace_chunks_on_build_id_and_chunk_index")
+}
+
+model ci_build_trace_section_names {
+  id                      Int                       @default(autoincrement()) @id
+  project_id              Int
+  name                    String
+  projects                projects                  @relation(fields: [project_id], references: [id])
+  ci_build_trace_sections ci_build_trace_sections[]
+
+  @@unique([project_id, name], name: "index_ci_build_trace_section_names_on_project_id_and_name")
+}
+
+model ci_build_trace_sections {
+  id                           Int                          @default(autoincrement()) @id
+  project_id                   Int
+  date_start                   DateTime
+  date_end                     DateTime
+  byte_start                   Int
+  byte_end                     Int
+  build_id                     Int
+  section_name_id              Int
+  ci_builds                    ci_builds                    @relation(fields: [build_id], references: [id])
+  projects                     projects                     @relation(fields: [project_id], references: [id])
+  ci_build_trace_section_names ci_build_trace_section_names @relation(fields: [section_name_id], references: [id])
+
+  @@index([project_id], name: "index_ci_build_trace_sections_on_project_id")
+  @@index([section_name_id], name: "index_ci_build_trace_sections_on_section_name_id")
+  @@unique([build_id, section_name_id], name: "index_ci_build_trace_sections_on_build_id_and_section_name_id")
+}
+
+model ci_group_variables {
+  id                   Int        @default(autoincrement()) @id
+  key                  String
+  value                String?
+  encrypted_value      String?
+  encrypted_value_salt String?
+  encrypted_value_iv   String?
+  group_id             Int
+  protected            Boolean    @default(false)
+  created_at           DateTime
+  updated_at           DateTime
+  masked               Boolean    @default(false)
+  variable_type        Int        @default(1)
+  namespaces           namespaces @relation(fields: [group_id], references: [id])
+
+  @@unique([group_id, key], name: "index_ci_group_variables_on_group_id_and_key")
+}
+
+model ci_job_artifacts {
+  id             Int       @default(autoincrement()) @id
+  project_id     Int
+  job_id         Int
+  file_type      Int
+  file_store     Int?
+  size           Int?
+  created_at     DateTime
+  updated_at     DateTime
+  expire_at      DateTime?
+  file           String?
+  // This type is currently not supported.
+  // file_sha256 binary?
+  file_format    Int?
+  file_location  Int?
+  ci_builds      ci_builds @relation(fields: [job_id], references: [id])
+  projects       projects  @relation(fields: [project_id], references: [id])
+
+  @@index([expire_at, job_id], name: "index_ci_job_artifacts_on_expire_at_and_job_id")
+  @@index([file_store], name: "index_ci_job_artifacts_on_file_store")
+  @@index([project_id], name: "index_ci_job_artifacts_on_project_id")
+  @@unique([job_id, file_type], name: "index_ci_job_artifacts_on_job_id_and_file_type")
+}
+
+model ci_pipeline_chat_data {
+  id           Int          @default(autoincrement()) @id
+  pipeline_id  Int          @unique
+  chat_name_id Int
+  response_url String
+  chat_names   chat_names   @relation(fields: [chat_name_id], references: [id])
+  ci_pipelines ci_pipelines @relation(fields: [pipeline_id], references: [id])
+
+  @@index([chat_name_id], name: "index_ci_pipeline_chat_data_on_chat_name_id")
+}
+
+model ci_pipelines {
+  id                                                           Int                     @default(autoincrement()) @id
+  ref                                                          String?
+  sha                                                          String?
+  before_sha                                                   String?
+  created_at                                                   DateTime?
+  updated_at                                                   DateTime?
+  tag                                                          Boolean?                @default(false)
+  yaml_errors                                                  String?
+  committed_at                                                 DateTime?
+  project_id                                                   Int?
+  status                                                       String?
+  started_at                                                   DateTime?
+  finished_at                                                  DateTime?
+  duration                                                     Int?
+  user_id                                                      Int?
+  lock_version                                                 Int?
+  auto_canceled_by_id                                          Int?
+  pipeline_schedule_id                                         Int?
+  source                                                       Int?
+  config_source                                                Int?
+  protected                                                    Boolean?
+  failure_reason                                               Int?
+  iid                                                          Int?
+  merge_request_id                                             Int?
+  // This type is currently not supported.
+  // source_sha                                                binary?
+  // This type is currently not supported.
+  // target_sha                                                binary?
+  ci_pipelines                                                 ci_pipelines?           @relation("ci_pipelinesToci_pipelines_auto_canceled_by_id", fields: [auto_canceled_by_id], references: [id])
+  merge_requests_ci_pipelines_merge_request_idTomerge_requests merge_requests?         @relation("ci_pipelines_merge_request_idTomerge_requests", fields: [merge_request_id], references: [id])
+  ci_pipeline_schedules                                        ci_pipeline_schedules?  @relation(fields: [pipeline_schedule_id], references: [id])
+  projects                                                     projects?               @relation(fields: [project_id], references: [id])
+  ci_builds_ci_builds_auto_canceled_by_idToci_pipelines        ci_builds[]             @relation("ci_builds_auto_canceled_by_idToci_pipelines")
+  ci_builds_ci_builds_commit_idToci_pipelines                  ci_builds[]             @relation("ci_builds_commit_idToci_pipelines")
+  ci_pipeline_chat_data                                        ci_pipeline_chat_data?
+  other_ci_pipelines                                           ci_pipelines[]          @relation("ci_pipelinesToci_pipelines_auto_canceled_by_id")
+  ci_pipeline_variables                                        ci_pipeline_variables[]
+  ci_stages                                                    ci_stages[]
+  merge_request_metrics                                        merge_request_metrics[]
+  merge_requests_ci_pipelinesTomerge_requests_head_pipeline_id merge_requests[]        @relation("ci_pipelinesTomerge_requests_head_pipeline_id")
+  merge_trains                                                 merge_trains[]
+
+  @@index([auto_canceled_by_id], name: "index_ci_pipelines_on_auto_canceled_by_id")
+  @@index([merge_request_id], name: "index_ci_pipelines_on_merge_request_id")
+  @@index([pipeline_schedule_id], name: "index_ci_pipelines_on_pipeline_schedule_id")
+  @@index([project_id], name: "index_ci_pipelines_on_project_id")
+  @@index([project_id, ref, status, id], name: "index_ci_pipelines_on_project_id_and_ref_and_status_and_id")
+  @@index([project_id, sha], name: "index_ci_pipelines_on_project_id_and_sha")
+  @@index([project_id, source], name: "index_ci_pipelines_on_project_id_and_source")
+  @@index([project_id, status, config_source], name: "index_ci_pipelines_on_project_id_and_status_and_config_source")
+  @@index([project_id, ref, id], name: "index_ci_pipelines_on_project_idandrefandiddesc")
+  @@index([status], name: "index_ci_pipelines_on_status")
+  @@index([user_id], name: "index_ci_pipelines_on_user_id")
+  @@unique([project_id, iid], name: "index_ci_pipelines_on_project_id_and_iid")
+}
+
+model ci_pipeline_schedules {
+  id                             Int                              @default(autoincrement()) @id
+  description                    String?
+  ref                            String?
+  cron                           String?
+  cron_timezone                  String?
+  next_run_at                    DateTime?
+  project_id                     Int?
+  owner_id                       Int?
+  active                         Boolean?                         @default(true)
+  created_at                     DateTime?
+  updated_at                     DateTime?
+  users                          users?                           @relation(fields: [owner_id], references: [id])
+  projects                       projects?                        @relation(fields: [project_id], references: [id])
+  ci_pipelines                   ci_pipelines[]
+  ci_pipeline_schedule_variables ci_pipeline_schedule_variables[]
+
+  @@index([next_run_at, active], name: "index_ci_pipeline_schedules_on_next_run_at_and_active")
+  @@index([owner_id], name: "index_ci_pipeline_schedules_on_owner_id")
+  @@index([project_id], name: "index_ci_pipeline_schedules_on_project_id")
+}
+
+model ci_pipeline_schedule_variables {
+  id                    Int                   @default(autoincrement()) @id
+  key                   String
+  value                 String?
+  encrypted_value       String?
+  encrypted_value_salt  String?
+  encrypted_value_iv    String?
+  pipeline_schedule_id  Int
+  created_at            DateTime?
+  updated_at            DateTime?
+  variable_type         Int                   @default(1)
+  ci_pipeline_schedules ci_pipeline_schedules @relation(fields: [pipeline_schedule_id], references: [id])
+
+  @@unique([pipeline_schedule_id, key], name: "index_ci_pipeline_schedule_variables_on_schedule_id_and_key")
+}
+
+model ci_pipeline_variables {
+  id                   Int          @default(autoincrement()) @id
+  key                  String
+  value                String?
+  encrypted_value      String?
+  encrypted_value_salt String?
+  encrypted_value_iv   String?
+  pipeline_id          Int
+  variable_type        Int          @default(1)
+  ci_pipelines         ci_pipelines @relation(fields: [pipeline_id], references: [id])
+
+  @@unique([pipeline_id, key], name: "index_ci_pipeline_variables_on_pipeline_id_and_key")
+}
+
+model ci_runner_namespaces {
+  id           Int         @default(autoincrement()) @id
+  runner_id    Int?
+  namespace_id Int?
+  namespaces   namespaces? @relation(fields: [namespace_id], references: [id])
+  ci_runners   ci_runners? @relation(fields: [runner_id], references: [id])
+
+  @@index([namespace_id], name: "index_ci_runner_namespaces_on_namespace_id")
+  @@unique([runner_id, namespace_id], name: "index_ci_runner_namespaces_on_runner_id_and_namespace_id")
+}
+
+model ci_runner_projects {
+  id         Int       @default(autoincrement()) @id
+  runner_id  Int
+  created_at DateTime?
+  updated_at DateTime?
+  project_id Int?
+  projects   projects? @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_ci_runner_projects_on_project_id")
+  @@index([runner_id], name: "index_ci_runner_projects_on_runner_id")
+}
+
+model ci_runners {
+  id                            Int                             @default(autoincrement()) @id
+  token                         String?
+  created_at                    DateTime?
+  updated_at                    DateTime?
+  description                   String?
+  contacted_at                  DateTime?
+  active                        Boolean                         @default(true)
+  is_shared                     Boolean?                        @default(false)
+  name                          String?
+  version                       String?
+  revision                      String?
+  platform                      String?
+  architecture                  String?
+  run_untagged                  Boolean                         @default(true)
+  locked                        Boolean                         @default(false)
+  access_level                  Int                             @default(0)
+  ip_address                    String?
+  maximum_timeout               Int?
+  runner_type                   Int
+  token_encrypted               String?
+  ci_runner_namespaces          ci_runner_namespaces[]
+  clusters_applications_runners clusters_applications_runners[]
+
+  @@index([contacted_at], name: "index_ci_runners_on_contacted_at")
+  @@index([is_shared], name: "index_ci_runners_on_is_shared")
+  @@index([locked], name: "index_ci_runners_on_locked")
+  @@index([runner_type], name: "index_ci_runners_on_runner_type")
+  @@index([token], name: "index_ci_runners_on_token")
+  @@index([token_encrypted], name: "index_ci_runners_on_token_encrypted")
+}
+
+model ci_stages {
+  id           Int           @default(autoincrement()) @id
+  project_id   Int?
+  pipeline_id  Int?
+  created_at   DateTime?
+  updated_at   DateTime?
+  name         String?
+  status       Int?
+  lock_version Int?
+  position     Int?
+  ci_pipelines ci_pipelines? @relation(fields: [pipeline_id], references: [id])
+  projects     projects?     @relation(fields: [project_id], references: [id])
+  ci_builds    ci_builds[]
+
+  @@index([pipeline_id], name: "index_ci_stages_on_pipeline_id")
+  @@index([pipeline_id, position], name: "index_ci_stages_on_pipeline_id_and_position")
+  @@index([project_id], name: "index_ci_stages_on_project_id")
+  @@unique([pipeline_id, name], name: "index_ci_stages_on_pipeline_id_and_name")
+}
+
+model ci_trigger_requests {
+  id          Int         @default(autoincrement()) @id
+  trigger_id  Int
+  variables   String?
+  created_at  DateTime?
+  updated_at  DateTime?
+  commit_id   Int?
+  ci_triggers ci_triggers @relation(fields: [trigger_id], references: [id])
+
+  @@index([commit_id], name: "index_ci_trigger_requests_on_commit_id")
+  @@index([trigger_id], name: "index_ci_trigger_requests_on_trigger_id")
+}
+
+model ci_triggers {
+  id                  Int                   @default(autoincrement()) @id
+  token               String?
+  created_at          DateTime?
+  updated_at          DateTime?
+  project_id          Int?
+  owner_id            Int?
+  description         String?
+  ref                 String?
+  users               users?                @relation(fields: [owner_id], references: [id])
+  projects            projects?             @relation(fields: [project_id], references: [id])
+  ci_trigger_requests ci_trigger_requests[]
+
+  @@index([owner_id], name: "index_ci_triggers_on_owner_id")
+  @@index([project_id], name: "index_ci_triggers_on_project_id")
+}
+
+model ci_variables {
+  id                   Int      @default(autoincrement()) @id
+  key                  String
+  value                String?
+  encrypted_value      String?
+  encrypted_value_salt String?
+  encrypted_value_iv   String?
+  project_id           Int
+  protected            Boolean  @default(false)
+  environment_scope    String   @default("*")
+  masked               Boolean  @default(false)
+  variable_type        Int      @default(1)
+  projects             projects @relation(fields: [project_id], references: [id])
+
+  @@unique([project_id, key, environment_scope], name: "index_ci_variables_on_project_id_and_key_and_environment_scope")
+}
+
+model cluster_groups {
+  id         Int        @default(autoincrement()) @id
+  cluster_id Int
+  group_id   Int
+  clusters   clusters   @relation(fields: [cluster_id], references: [id])
+  namespaces namespaces @relation(fields: [group_id], references: [id])
+
+  @@index([group_id], name: "index_cluster_groups_on_group_id")
+  @@unique([cluster_id, group_id], name: "index_cluster_groups_on_cluster_id_and_group_id")
+}
+
+model cluster_platforms_kubernetes {
+  id                    Int      @default(autoincrement()) @id
+  cluster_id            Int      @unique
+  created_at            DateTime
+  updated_at            DateTime
+  api_url               String?
+  ca_cert               String?
+  namespace             String?
+  username              String?
+  encrypted_password    String?
+  encrypted_password_iv String?
+  encrypted_token       String?
+  encrypted_token_iv    String?
+  authorization_type    Int?
+  clusters              clusters @relation(fields: [cluster_id], references: [id])
+}
+
+model cluster_projects {
+  id                             Int                              @default(autoincrement()) @id
+  project_id                     Int
+  cluster_id                     Int
+  created_at                     DateTime
+  updated_at                     DateTime
+  clusters                       clusters                         @relation(fields: [cluster_id], references: [id])
+  projects                       projects                         @relation(fields: [project_id], references: [id])
+  clusters_kubernetes_namespaces clusters_kubernetes_namespaces[]
+
+  @@index([cluster_id], name: "index_cluster_projects_on_cluster_id")
+  @@index([project_id], name: "index_cluster_projects_on_project_id")
+}
+
+model cluster_providers_gcp {
+  id                        Int      @default(autoincrement()) @id
+  cluster_id                Int      @unique
+  status                    Int?
+  num_nodes                 Int
+  created_at                DateTime
+  updated_at                DateTime
+  status_reason             String?
+  gcp_project_id            String
+  zone                      String
+  machine_type              String?
+  operation_id              String?
+  endpoint                  String?
+  encrypted_access_token    String?
+  encrypted_access_token_iv String?
+  legacy_abac               Boolean  @default(false)
+  clusters                  clusters @relation(fields: [cluster_id], references: [id])
+}
+
+model clusters {
+  id                                  Int                                  @default(autoincrement()) @id
+  user_id                             Int?
+  provider_type                       Int?
+  platform_type                       Int?
+  created_at                          DateTime
+  updated_at                          DateTime
+  enabled                             Boolean?                             @default(true)
+  name                                String
+  environment_scope                   String                               @default("*")
+  cluster_type                        Int                                  @default(3)
+  domain                              String?
+  managed                             Boolean                              @default(true)
+  users                               users?                               @relation(fields: [user_id], references: [id])
+  cluster_groups                      cluster_groups[]
+  cluster_platforms_kubernetes        cluster_platforms_kubernetes?
+  cluster_projects                    cluster_projects[]
+  cluster_providers_gcp               cluster_providers_gcp?
+  clusters_applications_cert_managers clusters_applications_cert_managers?
+  clusters_applications_helm          clusters_applications_helm?
+  clusters_applications_ingress       clusters_applications_ingress?
+  clusters_applications_jupyter       clusters_applications_jupyter?
+  clusters_applications_knative       clusters_applications_knative?
+  clusters_applications_prometheus    clusters_applications_prometheus?
+  clusters_applications_runners       clusters_applications_runners?
+  clusters_kubernetes_namespaces      clusters_kubernetes_namespaces[]
+
+  @@index([enabled], name: "index_clusters_on_enabled")
+  @@index([user_id], name: "index_clusters_on_user_id")
+}
+
+model clusters_applications_cert_managers {
+  id            Int      @default(autoincrement()) @id
+  cluster_id    Int      @unique
+  status        Int
+  version       String
+  email         String
+  created_at    DateTime
+  updated_at    DateTime
+  status_reason String?
+  clusters      clusters @relation(fields: [cluster_id], references: [id])
+}
+
+model clusters_applications_helm {
+  id                  Int      @default(autoincrement()) @id
+  cluster_id          Int      @unique
+  created_at          DateTime
+  updated_at          DateTime
+  status              Int
+  version             String
+  status_reason       String?
+  encrypted_ca_key    String?
+  encrypted_ca_key_iv String?
+  ca_cert             String?
+  clusters            clusters @relation(fields: [cluster_id], references: [id])
+}
+
+model clusters_applications_ingress {
+  id                Int      @default(autoincrement()) @id
+  cluster_id        Int      @unique
+  created_at        DateTime
+  updated_at        DateTime
+  status            Int
+  ingress_type      Int
+  version           String
+  cluster_ip        String?
+  status_reason     String?
+  external_ip       String?
+  external_hostname String?
+  clusters          clusters @relation(fields: [cluster_id], references: [id])
+}
+
+model clusters_applications_jupyter {
+  id                   Int                 @default(autoincrement()) @id
+  cluster_id           Int                 @unique
+  oauth_application_id Int?
+  status               Int
+  version              String
+  hostname             String?
+  created_at           DateTime
+  updated_at           DateTime
+  status_reason        String?
+  clusters             clusters            @relation(fields: [cluster_id], references: [id])
+  oauth_applications   oauth_applications? @relation(fields: [oauth_application_id], references: [id])
+
+  @@index([oauth_application_id], name: "index_clusters_applications_jupyter_on_oauth_application_id")
+}
+
+model clusters_applications_knative {
+  id                Int      @default(autoincrement()) @id
+  cluster_id        Int      @unique
+  created_at        DateTime
+  updated_at        DateTime
+  status            Int
+  version           String
+  hostname          String?
+  status_reason     String?
+  external_ip       String?
+  external_hostname String?
+  clusters          clusters @relation(fields: [cluster_id], references: [id])
+}
+
+model clusters_applications_prometheus {
+  id            Int      @default(autoincrement()) @id
+  cluster_id    Int      @unique
+  status        Int
+  version       String
+  status_reason String?
+  created_at    DateTime
+  updated_at    DateTime
+  clusters      clusters @relation(fields: [cluster_id], references: [id])
+}
+
+model clusters_applications_runners {
+  id            Int         @default(autoincrement()) @id
+  cluster_id    Int         @unique
+  runner_id     Int?
+  status        Int
+  created_at    DateTime
+  updated_at    DateTime
+  version       String
+  status_reason String?
+  privileged    Boolean     @default(true)
+  clusters      clusters    @relation(fields: [cluster_id], references: [id])
+  ci_runners    ci_runners? @relation(fields: [runner_id], references: [id])
+
+  @@index([runner_id], name: "index_clusters_applications_runners_on_runner_id")
+}
+
+model clusters_kubernetes_namespaces {
+  id                                 Int               @default(autoincrement()) @id
+  cluster_id                         Int
+  project_id                         Int?
+  cluster_project_id                 Int?
+  created_at                         DateTime
+  updated_at                         DateTime
+  encrypted_service_account_token    String?
+  encrypted_service_account_token_iv String?
+  namespace                          String
+  service_account_name               String?
+  clusters                           clusters          @relation(fields: [cluster_id], references: [id])
+  cluster_projects                   cluster_projects? @relation(fields: [cluster_project_id], references: [id])
+  projects                           projects?         @relation(fields: [project_id], references: [id])
+
+  @@index([cluster_id], name: "index_clusters_kubernetes_namespaces_on_cluster_id")
+  @@index([cluster_project_id], name: "index_clusters_kubernetes_namespaces_on_cluster_project_id")
+  @@index([project_id], name: "index_clusters_kubernetes_namespaces_on_project_id")
+  @@unique([cluster_id, namespace], name: "kubernetes_namespaces_cluster_and_namespace")
+}
+
+model container_repositories {
+  id         Int      @default(autoincrement()) @id
+  project_id Int
   name       String
-  experience Experience?
+  created_at DateTime
+  updated_at DateTime
+  projects   projects @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_container_repositories_on_project_id")
+  @@unique([project_id, name], name: "index_container_repositories_on_project_id_and_name")
 }
 
-model Amenities {
-  id                        String  @default(cuid()) @id
-  place                     Place
-  elevator                  Boolean
-  petsAllowed               Boolean
-  internet                  Boolean
-  kitchen                   Boolean
-  wirelessInternet          Boolean
-  familyKidFriendly         Boolean
-  freeParkingOnPremises     Boolean
-  hotTub                    Boolean
-  pool                      Boolean
-  smokingAllowed            Boolean
-  wheelchairAccessible      Boolean
-  breakfast                 Boolean
-  cableTv                   Boolean
-  suitableForEvents         Boolean
-  dryer                     Boolean
-  washer                    Boolean
-  indoorFireplace           Boolean
-  tv                        Boolean
-  heating                   Boolean
-  hangers                   Boolean
-  iron                      Boolean
-  hairDryer                 Boolean
-  doorman                   Boolean
-  paidParkingOffPremises    Boolean
-  freeParkingOnStreet       Boolean
-  gym                       Boolean
-  airConditioning           Boolean
-  shampoo                   Boolean
-  essentials                Boolean
-  laptopFriendlyWorkspace   Boolean
-  privateEntrance           Boolean
-  buzzerWirelessIntercom    Boolean
-  babyBath                  Boolean
-  babyMonitor               Boolean
-  babysitterRecommendations Boolean
-  bathtub                   Boolean
-  changingTable             Boolean
-  childrensBooksAndToys     Boolean
-  childrensDinnerware       Boolean
-  crib                      Boolean
+model conversational_development_index_metrics {
+  id                                    Int      @default(autoincrement()) @id
+  leader_issues                         Float
+  instance_issues                       Float
+  leader_notes                          Float
+  instance_notes                        Float
+  leader_milestones                     Float
+  instance_milestones                   Float
+  leader_boards                         Float
+  instance_boards                       Float
+  leader_merge_requests                 Float
+  instance_merge_requests               Float
+  leader_ci_pipelines                   Float
+  instance_ci_pipelines                 Float
+  leader_environments                   Float
+  instance_environments                 Float
+  leader_deployments                    Float
+  instance_deployments                  Float
+  leader_projects_prometheus_active     Float
+  instance_projects_prometheus_active   Float
+  leader_service_desk_issues            Float
+  instance_service_desk_issues          Float
+  created_at                            DateTime
+  updated_at                            DateTime
+  percentage_boards                     Float    @default(0.0)
+  percentage_ci_pipelines               Float    @default(0.0)
+  percentage_deployments                Float    @default(0.0)
+  percentage_environments               Float    @default(0.0)
+  percentage_issues                     Float    @default(0.0)
+  percentage_merge_requests             Float    @default(0.0)
+  percentage_milestones                 Float    @default(0.0)
+  percentage_notes                      Float    @default(0.0)
+  percentage_projects_prometheus_active Float    @default(0.0)
+  percentage_service_desk_issues        Float    @default(0.0)
 }
 
-model Review {
-  id            String      @default(cuid()) @id
-  createdAt     DateTime    @default(now())
-  text          String
-  stars         Int
-  accuracy      Int
-  location      Int
-  checkIn       Int
-  value         Int
-  cleanliness   Int
-  communication Int
-  place         Place
-  experience    Experience?
+model deploy_keys_projects {
+  id            Int       @default(autoincrement()) @id
+  deploy_key_id Int
+  project_id    Int
+  created_at    DateTime?
+  updated_at    DateTime?
+  can_push      Boolean   @default(false)
+  projects      projects  @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_deploy_keys_projects_on_project_id")
 }
 
-model Booking {
-  id        String   @default(cuid()) @id
-  createdAt DateTime @default(now())
-  bookee    User
-  place     Place
-  startDate DateTime
-  endDate   DateTime
-  payment   Payment?
+model deployments {
+  id              Int       @default(autoincrement()) @id
+  iid             Int
+  project_id      Int
+  environment_id  Int
+  ref             String
+  tag             Boolean
+  sha             String
+  user_id         Int?
+  deployable_id   Int?
+  deployable_type String?
+  created_at      DateTime?
+  updated_at      DateTime?
+  on_stop         String?
+  status          Int
+  finished_at     DateTime?
+  projects        projects  @relation(fields: [project_id], references: [id])
+
+  @@index([created_at], name: "index_deployments_on_created_at")
+  @@index([deployable_type, deployable_id], name: "index_deployments_on_deployable_type_and_deployable_id")
+  @@index([environment_id, id], name: "index_deployments_on_environment_id_and_id")
+  @@index([environment_id, iid, project_id], name: "index_deployments_on_environment_id_and_iid_and_project_id")
+  @@index([environment_id, status], name: "index_deployments_on_environment_id_and_status")
+  @@index([project_id, status], name: "index_deployments_on_project_id_and_status")
+  @@index([project_id, status, created_at], name: "index_deployments_on_project_id_and_status_and_created_at")
+  @@index([id], name: "partial_index_deployments_for_legacy_successful_deployments")
+  @@unique([project_id, iid], name: "index_deployments_on_project_id_and_iid")
 }
 
-model Payment {
-  id            String         @default(cuid()) @id
-  createdAt     DateTime       @default(now())
-  serviceFee    Float
-  placePrice    Float
-  totalPrice    Float
-  booking       Booking
-  paymentMethod PaymentAccount
+model deploy_tokens {
+  id                    Int                     @default(autoincrement()) @id
+  revoked               Boolean?                @default(false)
+  read_repository       Boolean                 @default(false)
+  read_registry         Boolean                 @default(false)
+  expires_at            DateTime
+  created_at            DateTime
+  name                  String
+  token                 String                  @unique
+  project_deploy_tokens project_deploy_tokens[]
+
+  @@index([token, expires_at, id], name: "index_deploy_tokens_on_token_and_expires_at_and_id")
 }
 
-model PaymentAccount {
-  id         String                 @default(cuid()) @id
-  createdAt  DateTime               @default(now())
-  type       PAYMENT_PROVIDER?
-  user       User
-  payments   Payment[]
-  paypal     PaypalInformation?
-  creditcard CreditCardInformation?
+model emails {
+  id                   Int       @default(autoincrement()) @id
+  user_id              Int
+  email                String    @unique
+  created_at           DateTime?
+  updated_at           DateTime?
+  confirmation_token   String?   @unique
+  confirmed_at         DateTime?
+  confirmation_sent_at DateTime?
+
+  @@index([user_id], name: "index_emails_on_user_id")
 }
 
-model PaypalInformation {
-  id             String         @default(cuid()) @id
-  createdAt      DateTime       @default(now())
-  email          String
-  paymentAccount PaymentAccount
+model environments {
+  id               Int       @default(autoincrement()) @id
+  project_id       Int
+  name             String
+  created_at       DateTime?
+  updated_at       DateTime?
+  external_url     String?
+  environment_type String?
+  state            String    @default("available")
+  slug             String
+  projects         projects  @relation(fields: [project_id], references: [id])
+
+  @@unique([project_id, name], name: "index_environments_on_project_id_and_name")
+  @@unique([project_id, slug], name: "index_environments_on_project_id_and_slug")
 }
 
-model CreditCardInformation {
-  id             String          @default(cuid()) @id
-  createdAt      DateTime        @default(now())
-  cardNumber     String
-  expiresOnMonth Int
-  expiresOnYear  Int
-  securityCode   String
-  firstName      String
-  lastName       String
-  postalCode     String
-  country        String
-  paymentAccount PaymentAccount?
+model events {
+  id                  Int                  @default(autoincrement()) @id
+  project_id          Int?
+  author_id           Int
+  target_id           Int?
+  created_at          DateTime
+  updated_at          DateTime
+  action              Int
+  target_type         String?
+  users               users                @relation(fields: [author_id], references: [id])
+  projects            projects?            @relation(fields: [project_id], references: [id])
+  push_event_payloads push_event_payloads?
+
+  @@index([action], name: "index_events_on_action")
+  @@index([author_id, project_id], name: "index_events_on_author_id_and_project_id")
+  @@index([project_id, created_at], name: "index_events_on_project_id_and_created_at")
+  @@index([project_id, id], name: "index_events_on_project_id_and_id")
+  @@index([target_type, target_id], name: "index_events_on_target_type_and_target_id")
 }
 
-model Message {
-  id          String   @default(cuid()) @id
-  createdAt   DateTime @default(now())
-  from        User     @relation("SentMessages")
-  to          User     @relation("ReceivedMessages")
-  deliveredAt DateTime
-  readAt      DateTime
+model feature_gates {
+  id          Int      @default(autoincrement()) @id
+  feature_key String
+  key         String
+  value       String?
+  created_at  DateTime
+  updated_at  DateTime
+
+  @@unique([feature_key, key, value], name: "index_feature_gates_on_feature_key_and_key_and_value")
 }
 
-model Notification {
-  id        String             @default(cuid()) @id
-  createdAt DateTime           @default(now())
-  type      NOTIFICATION_TYPE?
-  user      User
-  link      String
-  readDate  DateTime
+model features {
+  id         Int      @default(autoincrement()) @id
+  key        String   @unique
+  created_at DateTime
+  updated_at DateTime
 }
 
-model Restaurant {
-  id                String    @default(cuid()) @id
-  createdAt         DateTime  @default(now())
-  title             String
-  avgPricePerPerson Int
-  pictures          Picture[]
-  location          Location
-  isCurated         Boolean
-  slug              String
-  popularity        Int
+model forked_project_links {
+  id                     Int       @default(autoincrement()) @id
+  forked_to_project_id   Int       @unique
+  forked_from_project_id Int
+  created_at             DateTime?
+  updated_at             DateTime?
+  projects               projects  @relation(fields: [forked_to_project_id], references: [id])
 }
 
-enum CURRENCY {
-  CAD
-  CHF
-  EUR
-  JPY
-  USD
-  ZAR
+model fork_network_members {
+  id                                                             Int           @default(autoincrement()) @id
+  fork_network_id                                                Int
+  project_id                                                     Int           @unique
+  forked_from_project_id                                         Int?
+  fork_networks                                                  fork_networks @relation(fields: [fork_network_id], references: [id])
+  projects_fork_network_members_forked_from_project_idToprojects projects?     @relation("fork_network_members_forked_from_project_idToprojects", fields: [forked_from_project_id], references: [id])
+  projects_fork_network_members_project_idToprojects             projects      @relation("fork_network_members_project_idToprojects", fields: [project_id], references: [id])
+
+  @@index([fork_network_id], name: "index_fork_network_members_on_fork_network_id")
+  @@index([forked_from_project_id], name: "index_fork_network_members_on_forked_from_project_id")
 }
 
-enum PLACE_SIZES {
-  ENTIRE_HOUSE
-  ENTIRE_APARTMENT
-  ENTIRE_EARTH_HOUSE
-  ENTIRE_CABIN
-  ENTIRE_VILLA
-  ENTIRE_PLACE
-  ENTIRE_BOAT
-  PRIVATE_ROOM
+model fork_networks {
+  id                        Int                    @default(autoincrement()) @id
+  root_project_id           Int?                   @unique
+  deleted_root_project_name String?
+  projects                  projects?              @relation(fields: [root_project_id], references: [id])
+  fork_network_members      fork_network_members[]
 }
 
-enum PAYMENT_PROVIDER {
-  PAYPAL
-  CREDIT_CARD
+model gpg_keys {
+  id               Int               @default(autoincrement()) @id
+  created_at       DateTime
+  updated_at       DateTime
+  user_id          Int?
+  // This type is currently not supported.
+  // primary_keyid binary?           @unique
+  // This type is currently not supported.
+  // fingerprint   binary?           @unique
+  key              String?
+  users            users?            @relation(fields: [user_id], references: [id])
+  gpg_key_subkeys  gpg_key_subkeys[]
+  gpg_signatures   gpg_signatures[]
+
+  @@index([user_id], name: "index_gpg_keys_on_user_id")
 }
 
-enum NOTIFICATION_TYPE {
-  OFFER
-  INSTANT_BOOK
-  RESPONSIVENESS
-  NEW_AMENITIES
-  HOUSE_RULES
+model gpg_key_subkeys {
+  id             Int              @default(autoincrement()) @id
+  gpg_key_id     Int
+  // This type is currently not supported.
+  // keyid       binary?          @unique
+  // This type is currently not supported.
+  // fingerprint binary?          @unique
+  gpg_keys       gpg_keys         @relation(fields: [gpg_key_id], references: [id])
+  gpg_signatures gpg_signatures[]
+
+  @@index([gpg_key_id], name: "index_gpg_key_subkeys_on_gpg_key_id")
+}
+
+model gpg_signatures {
+  id                       Int              @default(autoincrement()) @id
+  created_at               DateTime
+  updated_at               DateTime
+  project_id               Int?
+  gpg_key_id               Int?
+  // This type is currently not supported.
+  // commit_sha            binary?          @unique
+  // This type is currently not supported.
+  // gpg_key_primary_keyid binary?
+  gpg_key_user_name        String?
+  gpg_key_user_email       String?
+  verification_status      Int              @default(0)
+  gpg_key_subkey_id        Int?
+  gpg_keys                 gpg_keys?        @relation(fields: [gpg_key_id], references: [id])
+  gpg_key_subkeys          gpg_key_subkeys? @relation(fields: [gpg_key_subkey_id], references: [id])
+  projects                 projects?        @relation(fields: [project_id], references: [id])
+
+  @@index([gpg_key_id], name: "index_gpg_signatures_on_gpg_key_id")
+  @@index([gpg_key_subkey_id], name: "index_gpg_signatures_on_gpg_key_subkey_id")
+  @@index([project_id], name: "index_gpg_signatures_on_project_id")
+}
+
+model group_custom_attributes {
+  id         Int        @default(autoincrement()) @id
+  created_at DateTime
+  updated_at DateTime
+  group_id   Int
+  key        String
+  value      String
+  namespaces namespaces @relation(fields: [group_id], references: [id])
+
+  @@index([key, value], name: "index_group_custom_attributes_on_key_and_value")
+  @@unique([group_id, key], name: "index_group_custom_attributes_on_group_id_and_key")
+}
+
+model identities {
+  id         Int       @default(autoincrement()) @id
+  extern_uid String?
+  provider   String?
+  user_id    Int?
+  created_at DateTime?
+  updated_at DateTime?
+
+  @@index([user_id], name: "index_identities_on_user_id")
+}
+
+model import_export_uploads {
+  id          Int       @default(autoincrement()) @id
+  updated_at  DateTime
+  project_id  Int?
+  import_file String?
+  export_file String?
+  projects    projects? @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_import_export_uploads_on_project_id")
+  @@index([updated_at], name: "index_import_export_uploads_on_updated_at")
+}
+
+model internal_ids {
+  id           Int         @default(autoincrement()) @id
+  project_id   Int?
+  usage        Int
+  last_value   Int
+  namespace_id Int?
+  namespaces   namespaces? @relation(fields: [namespace_id], references: [id])
+  projects     projects?   @relation(fields: [project_id], references: [id])
+
+  @@index([namespace_id], name: "index_internal_ids_on_namespace_id")
+  @@index([project_id], name: "index_internal_ids_on_project_id")
+  @@unique([usage, namespace_id], name: "index_internal_ids_on_usage_and_namespace_id")
+  @@unique([usage, project_id], name: "index_internal_ids_on_usage_and_project_id")
+}
+
+model issue_assignees {
+  user_id  Int
+  issue_id Int
+  issues   issues @relation(fields: [issue_id], references: [id])
+  users    users  @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "index_issue_assignees_on_user_id")
+  @@unique([issue_id, user_id], name: "index_issue_assignees_on_issue_id_and_user_id")
+}
+
+model issue_metrics {
+  id                                 Int       @default(autoincrement()) @id
+  issue_id                           Int
+  first_mentioned_in_commit_at       DateTime?
+  first_associated_with_milestone_at DateTime?
+  first_added_to_board_at            DateTime?
+  created_at                         DateTime
+  updated_at                         DateTime
+  issues                             issues    @relation(fields: [issue_id], references: [id])
+
+  @@index([issue_id], name: "index_issue_metrics")
+}
+
+model issues {
+  id                                Int                             @default(autoincrement()) @id
+  title                             String?
+  author_id                         Int?
+  project_id                        Int?
+  created_at                        DateTime?
+  updated_at                        DateTime?
+  description                       String?
+  milestone_id                      Int?
+  state                             String?
+  iid                               Int?
+  updated_by_id                     Int?
+  confidential                      Boolean                         @default(false)
+  due_date                          DateTime?
+  moved_to_id                       Int?
+  lock_version                      Int?
+  title_html                        String?
+  description_html                  String?
+  time_estimate                     Int?
+  relative_position                 Int?
+  cached_markdown_version           Int?
+  last_edited_at                    DateTime?
+  last_edited_by_id                 Int?
+  discussion_locked                 Boolean?
+  closed_at                         DateTime?
+  closed_by_id                      Int?
+  state_id                          Int?
+  users_issues_author_idTousers     users?                          @relation("issues_author_idTousers", fields: [author_id], references: [id])
+  users_issues_closed_by_idTousers  users?                          @relation("issues_closed_by_idTousers", fields: [closed_by_id], references: [id])
+  milestones                        milestones?                     @relation(fields: [milestone_id], references: [id])
+  issues                            issues?                         @relation("issuesToissues_moved_to_id", fields: [moved_to_id], references: [id])
+  projects                          projects?                       @relation(fields: [project_id], references: [id])
+  users_issues_updated_by_idTousers users?                          @relation("issues_updated_by_idTousers", fields: [updated_by_id], references: [id])
+  issue_assignees                   issue_assignees[]
+  issue_metrics                     issue_metrics[]
+  other_issues                      issues[]                        @relation("issuesToissues_moved_to_id")
+  merge_requests_closing_issues     merge_requests_closing_issues[]
+  resource_label_events             resource_label_events[]
+  timelogs                          timelogs[]
+
+  @@index([project_id, due_date, id, state], name: "idx_issues_on_project_id_and_due_date_and_id_and_state_partial")
+  @@index([author_id], name: "index_issues_on_author_id")
+  @@index([closed_by_id], name: "index_issues_on_closed_by_id")
+  @@index([confidential], name: "index_issues_on_confidential")
+  @@index([description], name: "index_issues_on_description_trigram")
+  @@index([milestone_id], name: "index_issues_on_milestone_id")
+  @@index([moved_to_id], name: "index_issues_on_moved_to_id")
+  @@index([project_id, created_at, id, state], name: "index_issues_on_project_id_and_created_at_and_id_and_state")
+  @@index([project_id, updated_at, id, state], name: "index_issues_on_project_id_and_updated_at_and_id_and_state")
+  @@index([relative_position], name: "index_issues_on_relative_position")
+  @@index([state], name: "index_issues_on_state")
+  @@index([title], name: "index_issues_on_title_trigram")
+  @@index([updated_at], name: "index_issues_on_updated_at")
+  @@index([updated_by_id], name: "index_issues_on_updated_by_id")
+  @@unique([project_id, iid], name: "index_issues_on_project_id_and_iid")
+}
+
+model keys {
+  id           Int       @default(autoincrement()) @id
+  user_id      Int?
+  created_at   DateTime?
+  updated_at   DateTime?
+  key          String?
+  title        String?
+  type         String?
+  fingerprint  String?   @unique
+  public       Boolean   @default(false)
+  last_used_at DateTime?
+
+  @@index([user_id], name: "index_keys_on_user_id")
+}
+
+model label_links {
+  id          Int       @default(autoincrement()) @id
+  label_id    Int?
+  target_id   Int?
+  target_type String?
+  created_at  DateTime?
+  updated_at  DateTime?
+  labels      labels?   @relation(fields: [label_id], references: [id])
+
+  @@index([label_id], name: "index_label_links_on_label_id")
+  @@index([target_id, target_type], name: "index_label_links_on_target_id_and_target_type")
+}
+
+model label_priorities {
+  id         Int      @default(autoincrement()) @id
+  project_id Int
+  label_id   Int
+  priority   Int
+  created_at DateTime
+  updated_at DateTime
+  labels     labels   @relation(fields: [label_id], references: [id])
+  projects   projects @relation(fields: [project_id], references: [id])
+
+  @@index([label_id], name: "index_label_priorities_on_label_id")
+  @@index([priority], name: "index_label_priorities_on_priority")
+  @@unique([project_id, label_id], name: "index_label_priorities_on_project_id_and_label_id")
+}
+
+model labels {
+  id                      Int                     @default(autoincrement()) @id
+  title                   String?
+  color                   String?
+  project_id              Int?
+  created_at              DateTime?
+  updated_at              DateTime?
+  template                Boolean?                @default(false)
+  description             String?
+  description_html        String?
+  type                    String?
+  group_id                Int?
+  cached_markdown_version Int?
+  namespaces              namespaces?             @relation(fields: [group_id], references: [id])
+  projects                projects?               @relation(fields: [project_id], references: [id])
+  label_links             label_links[]
+  label_priorities        label_priorities[]
+  lists                   lists[]
+  resource_label_events   resource_label_events[]
+
+  @@index([project_id], name: "index_labels_on_project_id")
+  @@index([template], name: "index_labels_on_template")
+  @@index([title], name: "index_labels_on_title")
+  @@index([type, project_id], name: "index_labels_on_type_and_project_id")
+  @@unique([group_id, project_id, title], name: "index_labels_on_group_id_and_project_id_and_title")
+}
+
+model lfs_file_locks {
+  id         Int      @default(autoincrement()) @id
+  project_id Int
+  user_id    Int
+  created_at DateTime
+  path       String?
+  projects   projects @relation(fields: [project_id], references: [id])
+  users      users    @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "index_lfs_file_locks_on_user_id")
+  @@unique([project_id, path], name: "index_lfs_file_locks_on_project_id_and_path")
+}
+
+model lfs_objects {
+  id         Int       @default(autoincrement()) @id
+  oid        String    @unique
+  size       Int
+  created_at DateTime?
+  updated_at DateTime?
+  file       String?
+  file_store Int?
+
+  @@index([file_store], name: "index_lfs_objects_on_file_store")
+}
+
+model lfs_objects_projects {
+  id            Int       @default(autoincrement()) @id
+  lfs_object_id Int
+  project_id    Int
+  created_at    DateTime?
+  updated_at    DateTime?
+
+  @@index([project_id], name: "index_lfs_objects_projects_on_project_id")
+}
+
+model lists {
+  id         Int      @default(autoincrement()) @id
+  board_id   Int
+  label_id   Int?
+  list_type  Int      @default(1)
+  position   Int?
+  created_at DateTime
+  updated_at DateTime
+  boards     boards   @relation(fields: [board_id], references: [id])
+  labels     labels?  @relation(fields: [label_id], references: [id])
+
+  @@index([label_id], name: "index_lists_on_label_id")
+  @@index([list_type], name: "index_lists_on_list_type")
+  @@unique([board_id, label_id], name: "index_lists_on_board_id_and_label_id")
+}
+
+model members {
+  id                 Int       @default(autoincrement()) @id
+  access_level       Int
+  source_id          Int
+  source_type        String
+  user_id            Int?
+  notification_level Int
+  type               String?
+  created_at         DateTime?
+  updated_at         DateTime?
+  created_by_id      Int?
+  invite_email       String?
+  invite_token       String?   @unique
+  invite_accepted_at DateTime?
+  requested_at       DateTime?
+  expires_at         DateTime?
+  users              users?    @relation(fields: [user_id], references: [id])
+
+  @@index([access_level], name: "index_members_on_access_level")
+  @@index([requested_at], name: "index_members_on_requested_at")
+  @@index([source_id, source_type], name: "index_members_on_source_id_and_source_type")
+  @@index([user_id], name: "index_members_on_user_id")
+}
+
+model merge_request_assignees {
+  id               Int            @default(autoincrement()) @id
+  user_id          Int
+  merge_request_id Int
+  merge_requests   merge_requests @relation(fields: [merge_request_id], references: [id])
+  users            users          @relation(fields: [user_id], references: [id])
+
+  @@index([merge_request_id], name: "index_merge_request_assignees_on_merge_request_id")
+  @@index([user_id], name: "index_merge_request_assignees_on_user_id")
+  @@unique([merge_request_id, user_id], name: "index_merge_request_assignees_on_merge_request_id_and_user_id")
+}
+
+model merge_request_blocks {
+  id                                                                            Int            @default(autoincrement()) @id
+  blocking_merge_request_id                                                     Int
+  blocked_merge_request_id                                                      Int
+  created_at                                                                    DateTime
+  updated_at                                                                    DateTime
+  merge_requests_merge_request_blocks_blocked_merge_request_idTomerge_requests  merge_requests @relation("merge_request_blocks_blocked_merge_request_idTomerge_requests", fields: [blocked_merge_request_id], references: [id])
+  merge_requests_merge_request_blocks_blocking_merge_request_idTomerge_requests merge_requests @relation("merge_request_blocks_blocking_merge_request_idTomerge_requests", fields: [blocking_merge_request_id], references: [id])
+
+  @@index([blocked_merge_request_id], name: "index_merge_request_blocks_on_blocked_merge_request_id")
+  @@unique([blocking_merge_request_id, blocked_merge_request_id], name: "index_mr_blocks_on_blocking_and_blocked_mr_ids")
+}
+
+model merge_request_diff_commits {
+  authored_date         DateTime?
+  committed_date        DateTime?
+  merge_request_diff_id Int
+  relative_order        Int
+  // This type is currently not supported.
+  // sha                binary
+  author_name           String?
+  author_email          String?
+  committer_name        String?
+  committer_email       String?
+  message               String?
+  merge_request_diffs   merge_request_diffs @relation(fields: [merge_request_diff_id], references: [id])
+
+  @@unique([merge_request_diff_id, relative_order], name: "index_merge_request_diff_commits_on_mr_diff_id_and_order")
+}
+
+model merge_request_diff_files {
+  merge_request_diff_id Int
+  relative_order        Int
+  new_file              Boolean
+  renamed_file          Boolean
+  deleted_file          Boolean
+  too_large             Boolean
+  a_mode                String
+  b_mode                String
+  new_path              String
+  old_path              String
+  diff                  String?
+  binary                Boolean?
+  external_diff_offset  Int?
+  external_diff_size    Int?
+  merge_request_diffs   merge_request_diffs @relation(fields: [merge_request_diff_id], references: [id])
+
+  @@unique([merge_request_diff_id, relative_order], name: "index_merge_request_diff_files_on_mr_diff_id_and_order")
+}
+
+model merge_request_diffs {
+  id                                                                              Int                          @default(autoincrement()) @id
+  state                                                                           String?
+  merge_request_id                                                                Int
+  created_at                                                                      DateTime?
+  updated_at                                                                      DateTime?
+  base_commit_sha                                                                 String?
+  real_size                                                                       String?
+  head_commit_sha                                                                 String?
+  start_commit_sha                                                                String?
+  commits_count                                                                   Int?
+  external_diff                                                                   String?
+  external_diff_store                                                             Int?
+  stored_externally                                                               Boolean?
+  merge_requests_merge_request_diffs_merge_request_idTomerge_requests             merge_requests               @relation("merge_request_diffs_merge_request_idTomerge_requests", fields: [merge_request_id], references: [id])
+  merge_request_diff_commits                                                      merge_request_diff_commits[]
+  merge_request_diff_files                                                        merge_request_diff_files[]
+  merge_requests_merge_request_diffsTomerge_requests_latest_merge_request_diff_id merge_requests[]             @relation("merge_request_diffsTomerge_requests_latest_merge_request_diff_id")
+
+  @@index([merge_request_id, id], name: "index_merge_request_diffs_on_merge_request_id_and_id")
+  @@index([merge_request_id, id], name: "index_merge_request_diffs_on_merge_request_id_and_id_partial")
+}
+
+model merge_request_metrics {
+  id                                                     Int            @default(autoincrement()) @id
+  merge_request_id                                       Int
+  latest_build_started_at                                DateTime?
+  latest_build_finished_at                               DateTime?
+  first_deployed_to_production_at                        DateTime?
+  merged_at                                              DateTime?
+  created_at                                             DateTime
+  updated_at                                             DateTime
+  pipeline_id                                            Int?
+  merged_by_id                                           Int?
+  latest_closed_by_id                                    Int?
+  latest_closed_at                                       DateTime?
+  users_merge_request_metrics_latest_closed_by_idTousers users?         @relation("merge_request_metrics_latest_closed_by_idTousers", fields: [latest_closed_by_id], references: [id])
+  merge_requests                                         merge_requests @relation(fields: [merge_request_id], references: [id])
+  users_merge_request_metrics_merged_by_idTousers        users?         @relation("merge_request_metrics_merged_by_idTousers", fields: [merged_by_id], references: [id])
+  ci_pipelines                                           ci_pipelines?  @relation(fields: [pipeline_id], references: [id])
+
+  @@index([merge_request_id], name: "index_merge_request_metrics")
+  @@index([first_deployed_to_production_at], name: "index_merge_request_metrics_on_first_deployed_to_production_at")
+  @@index([latest_closed_at], name: "index_merge_request_metrics_on_latest_closed_at")
+  @@index([latest_closed_by_id], name: "index_merge_request_metrics_on_latest_closed_by_id")
+  @@index([merge_request_id, merged_at], name: "index_merge_request_metrics_on_merge_request_id_and_merged_at")
+  @@index([merged_by_id], name: "index_merge_request_metrics_on_merged_by_id")
+  @@index([pipeline_id], name: "index_merge_request_metrics_on_pipeline_id")
+}
+
+model merge_requests {
+  id                                                                                   Int                             @default(autoincrement()) @id
+  target_branch                                                                        String
+  source_branch                                                                        String
+  source_project_id                                                                    Int?
+  author_id                                                                            Int?
+  assignee_id                                                                          Int?
+  title                                                                                String?
+  created_at                                                                           DateTime?
+  updated_at                                                                           DateTime?
+  milestone_id                                                                         Int?
+  state                                                                                String                          @default("opened")
+  merge_status                                                                         String                          @default("unchecked")
+  target_project_id                                                                    Int
+  iid                                                                                  Int?
+  description                                                                          String?
+  updated_by_id                                                                        Int?
+  merge_error                                                                          String?
+  merge_params                                                                         String?
+  merge_when_pipeline_succeeds                                                         Boolean                         @default(false)
+  merge_user_id                                                                        Int?
+  merge_commit_sha                                                                     String?
+  in_progress_merge_commit_sha                                                         String?
+  lock_version                                                                         Int?
+  title_html                                                                           String?
+  description_html                                                                     String?
+  time_estimate                                                                        Int?
+  cached_markdown_version                                                              Int?
+  last_edited_at                                                                       DateTime?
+  last_edited_by_id                                                                    Int?
+  head_pipeline_id                                                                     Int?
+  merge_jid                                                                            String?
+  discussion_locked                                                                    Boolean?
+  latest_merge_request_diff_id                                                         Int?
+  rebase_commit_sha                                                                    String?
+  squash                                                                               Boolean                         @default(false)
+  allow_maintainer_to_push                                                             Boolean?
+  state_id                                                                             Int?
+  users_merge_requests_assignee_idTousers                                              users?                          @relation("merge_requests_assignee_idTousers", fields: [assignee_id], references: [id])
+  users_merge_requests_author_idTousers                                                users?                          @relation("merge_requests_author_idTousers", fields: [author_id], references: [id])
+  ci_pipelines_ci_pipelinesTomerge_requests_head_pipeline_id                           ci_pipelines?                   @relation("ci_pipelinesTomerge_requests_head_pipeline_id", fields: [head_pipeline_id], references: [id])
+  merge_request_diffs_merge_request_diffsTomerge_requests_latest_merge_request_diff_id merge_request_diffs?            @relation("merge_request_diffsTomerge_requests_latest_merge_request_diff_id", fields: [latest_merge_request_diff_id], references: [id])
+  users_merge_requests_merge_user_idTousers                                            users?                          @relation("merge_requests_merge_user_idTousers", fields: [merge_user_id], references: [id])
+  milestones                                                                           milestones?                     @relation(fields: [milestone_id], references: [id])
+  projects_merge_requests_source_project_idToprojects                                  projects?                       @relation("merge_requests_source_project_idToprojects", fields: [source_project_id], references: [id])
+  projects_merge_requests_target_project_idToprojects                                  projects                        @relation("merge_requests_target_project_idToprojects", fields: [target_project_id], references: [id])
+  users_merge_requests_updated_by_idTousers                                            users?                          @relation("merge_requests_updated_by_idTousers", fields: [updated_by_id], references: [id])
+  ci_pipelines_ci_pipelines_merge_request_idTomerge_requests                           ci_pipelines[]                  @relation("ci_pipelines_merge_request_idTomerge_requests")
+  merge_request_assignees                                                              merge_request_assignees[]
+  merge_request_blocks_merge_request_blocks_blocked_merge_request_idTomerge_requests   merge_request_blocks[]          @relation("merge_request_blocks_blocked_merge_request_idTomerge_requests")
+  merge_request_blocks_merge_request_blocks_blocking_merge_request_idTomerge_requests  merge_request_blocks[]          @relation("merge_request_blocks_blocking_merge_request_idTomerge_requests")
+  merge_request_diffs_merge_request_diffs_merge_request_idTomerge_requests             merge_request_diffs[]           @relation("merge_request_diffs_merge_request_idTomerge_requests")
+  merge_request_metrics                                                                merge_request_metrics[]
+  merge_requests_closing_issues                                                        merge_requests_closing_issues[]
+  merge_trains                                                                         merge_trains?
+  resource_label_events                                                                resource_label_events[]
+  timelogs                                                                             timelogs[]
+
+  @@index([assignee_id], name: "index_merge_requests_on_assignee_id")
+  @@index([author_id], name: "index_merge_requests_on_author_id")
+  @@index([created_at], name: "index_merge_requests_on_created_at")
+  @@index([description], name: "index_merge_requests_on_description_trigram")
+  @@index([head_pipeline_id], name: "index_merge_requests_on_head_pipeline_id")
+  @@index([id, merge_jid], name: "index_merge_requests_on_id_and_merge_jid")
+  @@index([latest_merge_request_diff_id], name: "index_merge_requests_on_latest_merge_request_diff_id")
+  @@index([merge_user_id], name: "index_merge_requests_on_merge_user_id")
+  @@index([milestone_id], name: "index_merge_requests_on_milestone_id")
+  @@index([source_branch], name: "index_merge_requests_on_source_branch")
+  @@index([source_project_id, source_branch], name: "index_merge_requests_on_source_project_and_branch_state_opened")
+  @@index([source_project_id, source_branch], name: "index_merge_requests_on_source_project_id_and_source_branch")
+  @@index([state, merge_status], name: "index_merge_requests_on_state_and_merge_status")
+  @@index([target_branch], name: "index_merge_requests_on_target_branch")
+  @@index([target_project_id, iid], name: "index_merge_requests_on_target_project_id_and_iid_opened")
+  @@index([title], name: "index_merge_requests_on_title")
+  @@index([title], name: "index_merge_requests_on_title_trigram")
+  @@index([target_project_id, merge_commit_sha, id], name: "index_merge_requests_on_tp_id_and_merge_commit_sha_and_id")
+  @@index([updated_by_id], name: "index_merge_requests_on_updated_by_id")
+  @@unique([target_project_id, iid], name: "index_merge_requests_on_target_project_id_and_iid")
+}
+
+model merge_requests_closing_issues {
+  id               Int            @default(autoincrement()) @id
+  merge_request_id Int
+  issue_id         Int
+  created_at       DateTime
+  updated_at       DateTime
+  issues           issues         @relation(fields: [issue_id], references: [id])
+  merge_requests   merge_requests @relation(fields: [merge_request_id], references: [id])
+
+  @@index([issue_id], name: "index_merge_requests_closing_issues_on_issue_id")
+  @@index([merge_request_id], name: "index_merge_requests_closing_issues_on_merge_request_id")
+}
+
+model merge_trains {
+  id                Int            @default(autoincrement()) @id
+  merge_request_id  Int            @unique
+  user_id           Int
+  pipeline_id       Int?
+  created_at        DateTime
+  updated_at        DateTime
+  target_project_id Int
+  target_branch     String
+  merge_requests    merge_requests @relation(fields: [merge_request_id], references: [id])
+  ci_pipelines      ci_pipelines?  @relation(fields: [pipeline_id], references: [id])
+  projects          projects       @relation(fields: [target_project_id], references: [id])
+  users             users          @relation(fields: [user_id], references: [id])
+
+  @@index([pipeline_id], name: "index_merge_trains_on_pipeline_id")
+  @@index([target_project_id], name: "index_merge_trains_on_target_project_id")
+  @@index([user_id], name: "index_merge_trains_on_user_id")
+}
+
+model milestones {
+  id                      Int              @default(autoincrement()) @id
+  title                   String
+  project_id              Int?
+  description             String?
+  due_date                DateTime?
+  created_at              DateTime?
+  updated_at              DateTime?
+  state                   String?
+  iid                     Int?
+  title_html              String?
+  description_html        String?
+  start_date              DateTime?
+  cached_markdown_version Int?
+  group_id                Int?
+  namespaces              namespaces?      @relation(fields: [group_id], references: [id])
+  projects                projects?        @relation(fields: [project_id], references: [id])
+  issues                  issues[]
+  merge_requests          merge_requests[]
+
+  @@index([description], name: "index_milestones_on_description_trigram")
+  @@index([due_date], name: "index_milestones_on_due_date")
+  @@index([group_id], name: "index_milestones_on_group_id")
+  @@index([title], name: "index_milestones_on_title")
+  @@index([title], name: "index_milestones_on_title_trigram")
+  @@unique([project_id, iid], name: "index_milestones_on_project_id_and_iid")
+}
+
+model namespaces {
+  id                                 Int                                  @default(autoincrement()) @id
+  name                               String
+  path                               String
+  owner_id                           Int?
+  created_at                         DateTime?
+  updated_at                         DateTime?
+  type                               String?
+  description                        String                               @default("")
+  avatar                             String?
+  share_with_group_lock              Boolean?                             @default(false)
+  visibility_level                   Int                                  @default(20)
+  request_access_enabled             Boolean                              @default(false)
+  description_html                   String?
+  lfs_enabled                        Boolean?
+  parent_id                          Int?
+  require_two_factor_authentication  Boolean                              @default(false)
+  two_factor_grace_period            Int                                  @default(48)
+  cached_markdown_version            Int?
+  runners_token                      String?                              @unique
+  runners_token_encrypted            String?                              @unique
+  project_creation_level             Int?
+  auto_devops_enabled                Boolean?
+  last_ci_minutes_notification_at    DateTime?
+  badges                             badges[]
+  board_group_recent_visits          board_group_recent_visits[]
+  boards                             boards[]
+  chat_teams                         chat_teams?
+  ci_group_variables                 ci_group_variables[]
+  ci_runner_namespaces               ci_runner_namespaces[]
+  cluster_groups                     cluster_groups[]
+  group_custom_attributes            group_custom_attributes[]
+  internal_ids                       internal_ids[]
+  labels                             labels[]
+  milestones                         milestones[]
+  protected_tag_create_access_levels protected_tag_create_access_levels[]
+  todos                              todos[]
+
+  @@index([created_at], name: "index_namespaces_on_created_at")
+  @@index([name], name: "index_namespaces_on_name_trigram")
+  @@index([owner_id], name: "index_namespaces_on_owner_id")
+  @@index([path], name: "index_namespaces_on_path")
+  @@index([path], name: "index_namespaces_on_path_trigram")
+  @@index([require_two_factor_authentication], name: "index_namespaces_on_require_two_factor_authentication")
+  @@index([type], name: "index_namespaces_on_type")
+  @@unique([name, parent_id], name: "index_namespaces_on_name_and_parent_id")
+  @@unique([parent_id, id], name: "index_namespaces_on_parent_id_and_id")
+}
+
+model note_diff_files {
+  id           Int     @default(autoincrement()) @id
+  diff_note_id Int     @unique
+  diff         String
+  new_file     Boolean
+  renamed_file Boolean
+  deleted_file Boolean
+  a_mode       String
+  b_mode       String
+  new_path     String
+  old_path     String
+  notes        notes   @relation(fields: [diff_note_id], references: [id])
+}
+
+model notes {
+  id                      Int                   @default(autoincrement()) @id
+  note                    String?
+  noteable_type           String?
+  author_id               Int?
+  created_at              DateTime?
+  updated_at              DateTime?
+  project_id              Int?
+  attachment              String?
+  line_code               String?
+  commit_id               String?
+  noteable_id             Int?
+  system                  Boolean               @default(false)
+  st_diff                 String?
+  updated_by_id           Int?
+  type                    String?
+  position                String?
+  original_position       String?
+  resolved_at             DateTime?
+  resolved_by_id          Int?
+  discussion_id           String?
+  note_html               String?
+  cached_markdown_version Int?
+  change_position         String?
+  resolved_by_push        Boolean?
+  projects                projects?             @relation(fields: [project_id], references: [id])
+  note_diff_files         note_diff_files?
+  suggestions             suggestions[]
+  system_note_metadata    system_note_metadata?
+  todos                   todos[]
+
+  @@index([author_id], name: "index_notes_on_author_id")
+  @@index([commit_id], name: "index_notes_on_commit_id")
+  @@index([created_at], name: "index_notes_on_created_at")
+  @@index([discussion_id], name: "index_notes_on_discussion_id")
+  @@index([line_code], name: "index_notes_on_line_code")
+  @@index([note], name: "index_notes_on_note_trigram")
+  @@index([noteable_id, noteable_type], name: "index_notes_on_noteable_id_and_noteable_type")
+  @@index([noteable_type], name: "index_notes_on_noteable_type")
+  @@index([project_id, noteable_type], name: "index_notes_on_project_id_and_noteable_type")
+}
+
+model notification_settings {
+  id                     Int      @default(autoincrement()) @id
+  user_id                Int
+  source_id              Int?
+  source_type            String?
+  level                  Int      @default(0)
+  created_at             DateTime
+  updated_at             DateTime
+  new_note               Boolean?
+  new_issue              Boolean?
+  reopen_issue           Boolean?
+  close_issue            Boolean?
+  reassign_issue         Boolean?
+  new_merge_request      Boolean?
+  reopen_merge_request   Boolean?
+  close_merge_request    Boolean?
+  reassign_merge_request Boolean?
+  merge_merge_request    Boolean?
+  failed_pipeline        Boolean?
+  success_pipeline       Boolean?
+  push_to_merge_request  Boolean?
+  issue_due              Boolean?
+  notification_email     String?
+  users                  users    @relation(fields: [user_id], references: [id])
+
+  @@index([source_id, source_type], name: "index_notification_settings_on_source_id_and_source_type")
+  @@index([user_id], name: "index_notification_settings_on_user_id")
+  @@unique([user_id, source_id, source_type], name: "index_notifications_on_user_id_and_source_id_and_source_type")
+}
+
+model oauth_access_grants {
+  id                    Int                     @default(autoincrement()) @id
+  resource_owner_id     Int
+  application_id        Int
+  token                 String                  @unique
+  expires_in            Int
+  redirect_uri          String
+  created_at            DateTime
+  revoked_at            DateTime?
+  scopes                String?
+  oauth_openid_requests oauth_openid_requests[]
+}
+
+model oauth_access_tokens {
+  id                Int       @default(autoincrement()) @id
+  resource_owner_id Int?
+  application_id    Int?
+  token             String    @unique
+  refresh_token     String?   @unique
+  expires_in        Int?
+  revoked_at        DateTime?
+  created_at        DateTime
+  scopes            String?
+
+  @@index([resource_owner_id], name: "index_oauth_access_tokens_on_resource_owner_id")
+}
+
+model oauth_applications {
+  id                            Int                             @default(autoincrement()) @id
+  name                          String
+  uid                           String                          @unique
+  secret                        String
+  redirect_uri                  String
+  scopes                        String                          @default("")
+  created_at                    DateTime?
+  updated_at                    DateTime?
+  owner_id                      Int?
+  owner_type                    String?
+  trusted                       Boolean                         @default(false)
+  clusters_applications_jupyter clusters_applications_jupyter[]
+
+  @@index([owner_id, owner_type], name: "index_oauth_applications_on_owner_id_and_owner_type")
+}
+
+model oauth_openid_requests {
+  id                  Int                 @default(autoincrement()) @id
+  access_grant_id     Int
+  nonce               String
+  oauth_access_grants oauth_access_grants @relation(fields: [access_grant_id], references: [id])
+
+  @@index([access_grant_id], name: "index_oauth_openid_requests_on_access_grant_id")
+}
+
+model pages_domain_acme_orders {
+  id                       Int           @default(autoincrement()) @id
+  pages_domain_id          Int
+  expires_at               DateTime
+  created_at               DateTime
+  updated_at               DateTime
+  url                      String
+  challenge_token          String
+  challenge_file_content   String
+  encrypted_private_key    String
+  encrypted_private_key_iv String
+  pages_domains            pages_domains @relation(fields: [pages_domain_id], references: [id])
+
+  @@index([challenge_token], name: "index_pages_domain_acme_orders_on_challenge_token")
+  @@index([pages_domain_id], name: "index_pages_domain_acme_orders_on_pages_domain_id")
+}
+
+model pages_domains {
+  id                           Int                        @default(autoincrement()) @id
+  project_id                   Int?
+  certificate                  String?
+  encrypted_key                String?
+  encrypted_key_iv             String?
+  encrypted_key_salt           String?
+  domain                       String?                    @unique
+  verified_at                  DateTime?
+  verification_code            String
+  enabled_until                DateTime?
+  remove_at                    DateTime?
+  auto_ssl_enabled             Boolean                    @default(false)
+  certificate_valid_not_before DateTime?
+  certificate_valid_not_after  DateTime?
+  projects                     projects?                  @relation(fields: [project_id], references: [id])
+  pages_domain_acme_orders     pages_domain_acme_orders[]
+
+  @@index([project_id], name: "index_pages_domains_on_project_id")
+  @@index([project_id, enabled_until], name: "index_pages_domains_on_project_id_and_enabled_until")
+  @@index([remove_at], name: "index_pages_domains_on_remove_at")
+  @@index([verified_at], name: "index_pages_domains_on_verified_at")
+  @@index([verified_at, enabled_until], name: "index_pages_domains_on_verified_at_and_enabled_until")
+}
+
+model personal_access_tokens {
+  id            Int       @default(autoincrement()) @id
+  user_id       Int
+  name          String
+  revoked       Boolean?  @default(false)
+  expires_at    DateTime?
+  created_at    DateTime
+  updated_at    DateTime
+  scopes        String    @default("--- []\n")
+  impersonation Boolean   @default(false)
+  token_digest  String?   @unique
+  users         users     @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "index_personal_access_tokens_on_user_id")
+}
+
+model pool_repositories {
+  id                                                      Int        @default(autoincrement()) @id
+  shard_id                                                Int
+  disk_path                                               String?    @unique
+  state                                                   String?
+  source_project_id                                       Int?       @unique
+  shards                                                  shards     @relation(fields: [shard_id], references: [id])
+  projects_pool_repositories_source_project_idToprojects  projects?  @relation("pool_repositories_source_project_idToprojects", fields: [source_project_id], references: [id])
+  projects_pool_repositoriesToprojects_pool_repository_id projects[] @relation("pool_repositoriesToprojects_pool_repository_id")
+
+  @@index([shard_id], name: "index_pool_repositories_on_shard_id")
+}
+
+model programming_languages {
+  id         Int      @default(autoincrement()) @id
+  name       String   @unique
+  color      String
+  created_at DateTime
+}
+
+model project_authorizations {
+  user_id      Int
+  project_id   Int
+  access_level Int
+  projects     projects @relation(fields: [project_id], references: [id])
+  users        users    @relation(fields: [user_id], references: [id])
+
+  @@index([project_id], name: "index_project_authorizations_on_project_id")
+  @@unique([user_id, project_id, access_level], name: "index_project_authorizations_on_user_id_project_id_access_level")
+}
+
+model project_auto_devops {
+  id              Int      @default(autoincrement()) @id
+  project_id      Int      @unique
+  created_at      DateTime
+  updated_at      DateTime
+  enabled         Boolean?
+  deploy_strategy Int      @default(0)
+  projects        projects @relation(fields: [project_id], references: [id])
+}
+
+model project_ci_cd_settings {
+  id                      Int      @default(autoincrement()) @id
+  project_id              Int      @unique
+  group_runners_enabled   Boolean  @default(true)
+  merge_pipelines_enabled Boolean?
+  merge_trains_enabled    Boolean  @default(false)
+  default_git_depth       Int?
+  projects                projects @relation(fields: [project_id], references: [id])
+}
+
+model project_custom_attributes {
+  id         Int      @default(autoincrement()) @id
+  created_at DateTime
+  updated_at DateTime
+  project_id Int
+  key        String
+  value      String
+  projects   projects @relation(fields: [project_id], references: [id])
+
+  @@index([key, value], name: "index_project_custom_attributes_on_key_and_value")
+  @@unique([project_id, key], name: "index_project_custom_attributes_on_project_id_and_key")
+}
+
+model project_daily_statistics {
+  id          Int       @default(autoincrement()) @id
+  project_id  Int
+  fetch_count Int
+  date        DateTime?
+  projects    projects  @relation(fields: [project_id], references: [id])
+
+  @@unique([project_id, date], name: "index_project_daily_statistics_on_project_id_and_date")
+}
+
+model project_deploy_tokens {
+  id              Int           @default(autoincrement()) @id
+  project_id      Int
+  deploy_token_id Int
+  created_at      DateTime
+  deploy_tokens   deploy_tokens @relation(fields: [deploy_token_id], references: [id])
+  projects        projects      @relation(fields: [project_id], references: [id])
+
+  @@index([deploy_token_id], name: "index_project_deploy_tokens_on_deploy_token_id")
+  @@unique([project_id, deploy_token_id], name: "index_project_deploy_tokens_on_project_id_and_deploy_token_id")
+}
+
+model project_error_tracking_settings {
+  project_id         Int      @id
+  enabled            Boolean  @default(false)
+  api_url            String?
+  encrypted_token    String?
+  encrypted_token_iv String?
+  project_name       String?
+  organization_name  String?
+  projects           projects @relation(fields: [project_id], references: [id])
+}
+
+model project_features {
+  id                          Int       @default(autoincrement()) @id
+  project_id                  Int       @unique
+  merge_requests_access_level Int?
+  issues_access_level         Int?
+  wiki_access_level           Int?
+  snippets_access_level       Int       @default(20)
+  builds_access_level         Int?
+  created_at                  DateTime?
+  updated_at                  DateTime?
+  repository_access_level     Int       @default(20)
+  pages_access_level          Int       @default(20)
+  projects                    projects  @relation(fields: [project_id], references: [id])
+}
+
+model project_group_links {
+  id           Int       @default(autoincrement()) @id
+  project_id   Int
+  group_id     Int
+  created_at   DateTime?
+  updated_at   DateTime?
+  group_access Int       @default(30)
+  expires_at   DateTime?
+  projects     projects  @relation(fields: [project_id], references: [id])
+
+  @@index([group_id], name: "index_project_group_links_on_group_id")
+  @@index([project_id], name: "index_project_group_links_on_project_id")
+}
+
+model project_import_data {
+  id                         Int       @default(autoincrement()) @id
+  project_id                 Int?
+  data                       String?
+  encrypted_credentials      String?
+  encrypted_credentials_iv   String?
+  encrypted_credentials_salt String?
+  projects                   projects? @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_project_import_data_on_project_id")
+}
+
+model project_metrics_settings {
+  project_id             Int      @id
+  external_dashboard_url String
+  projects               projects @relation(fields: [project_id], references: [id])
+}
+
+model project_mirror_data {
+  id         Int      @default(autoincrement()) @id
+  project_id Int      @unique
+  status     String?
+  jid        String?
+  last_error String?
+  projects   projects @relation(fields: [project_id], references: [id])
+
+  @@index([jid], name: "index_project_mirror_data_on_jid")
+  @@index([status], name: "index_project_mirror_data_on_status")
+}
+
+model project_repositories {
+  id         Int      @default(autoincrement()) @id
+  shard_id   Int
+  disk_path  String   @unique
+  project_id Int      @unique
+  projects   projects @relation(fields: [project_id], references: [id])
+  shards     shards   @relation(fields: [shard_id], references: [id])
+
+  @@index([shard_id], name: "index_project_repositories_on_shard_id")
+}
+
+model projects {
+  id                                                                         Int                               @default(autoincrement()) @id
+  name                                                                       String?
+  path                                                                       String?
+  description                                                                String?
+  created_at                                                                 DateTime?
+  updated_at                                                                 DateTime?
+  creator_id                                                                 Int?
+  namespace_id                                                               Int
+  last_activity_at                                                           DateTime?
+  import_url                                                                 String?
+  visibility_level                                                           Int                               @default(0)
+  archived                                                                   Boolean                           @default(false)
+  avatar                                                                     String?
+  import_status                                                              String?
+  star_count                                                                 Int                               @default(0)
+  import_type                                                                String?
+  import_source                                                              String?
+  import_error                                                               String?
+  shared_runners_enabled                                                     Boolean                           @default(true)
+  runners_token                                                              String?
+  build_coverage_regex                                                       String?
+  build_allow_git_fetch                                                      Boolean                           @default(true)
+  build_timeout                                                              Int                               @default(3600)
+  pending_delete                                                             Boolean?                          @default(false)
+  public_builds                                                              Boolean                           @default(true)
+  last_repository_check_failed                                               Boolean?
+  last_repository_check_at                                                   DateTime?
+  container_registry_enabled                                                 Boolean?
+  only_allow_merge_if_pipeline_succeeds                                      Boolean                           @default(false)
+  has_external_issue_tracker                                                 Boolean?
+  repository_storage                                                         String                            @default("default")
+  request_access_enabled                                                     Boolean                           @default(false)
+  has_external_wiki                                                          Boolean?
+  ci_config_path                                                             String?
+  lfs_enabled                                                                Boolean?
+  description_html                                                           String?
+  only_allow_merge_if_all_discussions_are_resolved                           Boolean?
+  printing_merge_request_link_enabled                                        Boolean                           @default(true)
+  auto_cancel_pending_pipelines                                              Int                               @default(1)
+  import_jid                                                                 String?
+  cached_markdown_version                                                    Int?
+  delete_error                                                               String?
+  last_repository_updated_at                                                 DateTime?
+  storage_version                                                            Int?
+  resolve_outdated_diff_discussions                                          Boolean?
+  repository_read_only                                                       Boolean?
+  merge_requests_ff_only_enabled                                             Boolean?                          @default(false)
+  merge_requests_rebase_enabled                                              Boolean                           @default(false)
+  jobs_cache_index                                                           Int?
+  pages_https_only                                                           Boolean?                          @default(true)
+  remote_mirror_available_overridden                                         Boolean?
+  pool_repository_id                                                         Int?
+  runners_token_encrypted                                                    String?
+  bfg_object_map                                                             String?
+  detected_repository_languages                                              Boolean?
+  external_authorization_classification_label                                String?
+  pool_repositories_pool_repositoriesToprojects_pool_repository_id           pool_repositories?                @relation("pool_repositoriesToprojects_pool_repository_id", fields: [pool_repository_id], references: [id])
+  badges                                                                     badges[]
+  board_project_recent_visits                                                board_project_recent_visits[]
+  boards                                                                     boards[]
+  ci_builds                                                                  ci_builds[]
+  ci_builds_metadata                                                         ci_builds_metadata[]
+  ci_build_trace_section_names                                               ci_build_trace_section_names[]
+  ci_build_trace_sections                                                    ci_build_trace_sections[]
+  ci_job_artifacts                                                           ci_job_artifacts[]
+  ci_pipelines                                                               ci_pipelines[]
+  ci_pipeline_schedules                                                      ci_pipeline_schedules[]
+  ci_runner_projects                                                         ci_runner_projects[]
+  ci_stages                                                                  ci_stages[]
+  ci_triggers                                                                ci_triggers[]
+  ci_variables                                                               ci_variables[]
+  cluster_projects                                                           cluster_projects[]
+  clusters_kubernetes_namespaces                                             clusters_kubernetes_namespaces[]
+  container_repositories                                                     container_repositories[]
+  deploy_keys_projects                                                       deploy_keys_projects[]
+  deployments                                                                deployments[]
+  environments                                                               environments[]
+  events                                                                     events[]
+  forked_project_links                                                       forked_project_links?
+  fork_network_members_fork_network_members_forked_from_project_idToprojects fork_network_members[]            @relation("fork_network_members_forked_from_project_idToprojects")
+  fork_network_members_fork_network_members_project_idToprojects             fork_network_members?             @relation("fork_network_members_project_idToprojects")
+  fork_networks                                                              fork_networks?
+  gpg_signatures                                                             gpg_signatures[]
+  import_export_uploads                                                      import_export_uploads[]
+  internal_ids                                                               internal_ids[]
+  issues                                                                     issues[]
+  label_priorities                                                           label_priorities[]
+  labels                                                                     labels[]
+  lfs_file_locks                                                             lfs_file_locks[]
+  merge_requests_merge_requests_source_project_idToprojects                  merge_requests[]                  @relation("merge_requests_source_project_idToprojects")
+  merge_requests_merge_requests_target_project_idToprojects                  merge_requests[]                  @relation("merge_requests_target_project_idToprojects")
+  merge_trains                                                               merge_trains[]
+  milestones                                                                 milestones[]
+  notes                                                                      notes[]
+  pages_domains                                                              pages_domains[]
+  pool_repositories_pool_repositories_source_project_idToprojects            pool_repositories?                @relation("pool_repositories_source_project_idToprojects")
+  project_authorizations                                                     project_authorizations[]
+  project_auto_devops                                                        project_auto_devops?
+  project_ci_cd_settings                                                     project_ci_cd_settings?
+  project_custom_attributes                                                  project_custom_attributes[]
+  project_daily_statistics                                                   project_daily_statistics[]
+  project_deploy_tokens                                                      project_deploy_tokens[]
+  project_error_tracking_settings                                            project_error_tracking_settings[]
+  project_features                                                           project_features?
+  project_group_links                                                        project_group_links[]
+  project_import_data                                                        project_import_data[]
+  project_metrics_settings                                                   project_metrics_settings[]
+  project_mirror_data                                                        project_mirror_data?
+  project_repositories                                                       project_repositories?
+  project_statistics                                                         project_statistics?
+  prometheus_metrics                                                         prometheus_metrics[]
+  protected_branches                                                         protected_branches[]
+  protected_tags                                                             protected_tags[]
+  releases                                                                   releases[]
+  remote_mirrors                                                             remote_mirrors[]
+  repository_languages                                                       repository_languages[]
+  services                                                                   services[]
+  snippets                                                                   snippets[]
+  subscriptions                                                              subscriptions[]
+  todos                                                                      todos[]
+  trending_projects                                                          trending_projects?
+  user_interacted_projects                                                   user_interacted_projects[]
+  users_star_projects                                                        users_star_projects[]
+  web_hooks                                                                  web_hooks[]
+
+  @@index([repository_storage, created_at], name: "idx_project_repository_check_partial")
+  @@index([created_at], name: "index_projects_on_created_at")
+  @@index([creator_id], name: "index_projects_on_creator_id")
+  @@index([description], name: "index_projects_on_description_trigram")
+  @@index([last_activity_at], name: "index_projects_on_last_activity_at")
+  @@index([last_repository_check_at], name: "index_projects_on_last_repository_check_at")
+  @@index([last_repository_check_failed], name: "index_projects_on_last_repository_check_failed")
+  @@index([last_repository_updated_at], name: "index_projects_on_last_repository_updated_at")
+  @@index([name], name: "index_projects_on_name_trigram")
+  @@index([namespace_id], name: "index_projects_on_namespace_id")
+  @@index([path], name: "index_projects_on_path")
+  @@index([path], name: "index_projects_on_path_trigram")
+  @@index([pending_delete], name: "index_projects_on_pending_delete")
+  @@index([pool_repository_id], name: "index_projects_on_pool_repository_id")
+  @@index([repository_storage], name: "index_projects_on_repository_storage")
+  @@index([runners_token], name: "index_projects_on_runners_token")
+  @@index([runners_token_encrypted], name: "index_projects_on_runners_token_encrypted")
+  @@index([star_count], name: "index_projects_on_star_count")
+  @@index([visibility_level], name: "index_projects_on_visibility_level")
+}
+
+model project_statistics {
+  id                   Int      @default(autoincrement()) @id
+  project_id           Int      @unique
+  namespace_id         Int
+  commit_count         Int      @default(0)
+  storage_size         Int      @default(0)
+  repository_size      Int      @default(0)
+  lfs_objects_size     Int      @default(0)
+  build_artifacts_size Int      @default(0)
+  packages_size        Int      @default(0)
+  wiki_size            Int?
+  projects             projects @relation(fields: [project_id], references: [id])
+
+  @@index([namespace_id], name: "index_project_statistics_on_namespace_id")
+}
+
+model prometheus_metrics {
+  id         Int       @default(autoincrement()) @id
+  project_id Int?
+  title      String
+  query      String
+  y_label    String?
+  unit       String?
+  legend     String?
+  group      Int
+  created_at DateTime
+  updated_at DateTime
+  common     Boolean   @default(false)
+  identifier String?   @unique
+  projects   projects? @relation(fields: [project_id], references: [id])
+
+  @@index([common], name: "index_prometheus_metrics_on_common")
+  @@index([group], name: "index_prometheus_metrics_on_group")
+  @@index([project_id], name: "index_prometheus_metrics_on_project_id")
+}
+
+model protected_branches {
+  id                                   Int                                    @default(autoincrement()) @id
+  project_id                           Int
+  name                                 String
+  created_at                           DateTime?
+  updated_at                           DateTime?
+  projects                             projects                               @relation(fields: [project_id], references: [id])
+  protected_branch_merge_access_levels protected_branch_merge_access_levels[]
+  protected_branch_push_access_levels  protected_branch_push_access_levels[]
+
+  @@index([project_id], name: "index_protected_branches_on_project_id")
+}
+
+model protected_branch_merge_access_levels {
+  id                  Int                @default(autoincrement()) @id
+  protected_branch_id Int
+  access_level        Int                @default(40)
+  created_at          DateTime
+  updated_at          DateTime
+  protected_branches  protected_branches @relation(fields: [protected_branch_id], references: [id])
+
+  @@index([protected_branch_id], name: "index_protected_branch_merge_access")
+}
+
+model protected_branch_push_access_levels {
+  id                  Int                @default(autoincrement()) @id
+  protected_branch_id Int
+  access_level        Int                @default(40)
+  created_at          DateTime
+  updated_at          DateTime
+  protected_branches  protected_branches @relation(fields: [protected_branch_id], references: [id])
+
+  @@index([protected_branch_id], name: "index_protected_branch_push_access")
+}
+
+model protected_tag_create_access_levels {
+  id               Int            @default(autoincrement()) @id
+  protected_tag_id Int
+  access_level     Int?           @default(40)
+  user_id          Int?
+  group_id         Int?
+  created_at       DateTime
+  updated_at       DateTime
+  namespaces       namespaces?    @relation(fields: [group_id], references: [id])
+  protected_tags   protected_tags @relation(fields: [protected_tag_id], references: [id])
+  users            users?         @relation(fields: [user_id], references: [id])
+
+  @@index([protected_tag_id], name: "index_protected_tag_create_access")
+  @@index([group_id], name: "index_protected_tag_create_access_levels_on_group_id")
+  @@index([user_id], name: "index_protected_tag_create_access_levels_on_user_id")
+}
+
+model protected_tags {
+  id                                 Int                                  @default(autoincrement()) @id
+  project_id                         Int
+  name                               String
+  created_at                         DateTime
+  updated_at                         DateTime
+  projects                           projects                             @relation(fields: [project_id], references: [id])
+  protected_tag_create_access_levels protected_tag_create_access_levels[]
+
+  @@index([project_id], name: "index_protected_tags_on_project_id")
+  @@unique([project_id, name], name: "index_protected_tags_on_project_id_and_name")
+}
+
+model push_event_payloads {
+  commit_count   Int
+  event_id       Int     @unique
+  action         Int
+  ref_type       Int
+  // This type is currently not supported.
+  // commit_from binary?
+  // This type is currently not supported.
+  // commit_to   binary?
+  ref            String?
+  commit_title   String?
+  events         events  @relation(fields: [event_id], references: [id])
+}
+
+model redirect_routes {
+  id          Int      @default(autoincrement()) @id
+  source_id   Int
+  source_type String
+  path        String   @unique
+  created_at  DateTime
+  updated_at  DateTime
+
+  @@index([source_type, source_id], name: "index_redirect_routes_on_source_type_and_source_id")
+}
+
+model release_links {
+  id         Int      @default(autoincrement()) @id
+  release_id Int
+  url        String
+  name       String
+  created_at DateTime
+  updated_at DateTime
+  releases   releases @relation(fields: [release_id], references: [id])
+
+  @@unique([release_id, name], name: "index_release_links_on_release_id_and_name")
+  @@unique([release_id, url], name: "index_release_links_on_release_id_and_url")
+}
+
+model releases {
+  id                      Int             @default(autoincrement()) @id
+  tag                     String?
+  description             String?
+  project_id              Int?
+  created_at              DateTime?
+  updated_at              DateTime?
+  description_html        String?
+  cached_markdown_version Int?
+  author_id               Int?
+  name                    String?
+  sha                     String?
+  users                   users?          @relation(fields: [author_id], references: [id])
+  projects                projects?       @relation(fields: [project_id], references: [id])
+  release_links           release_links[]
+
+  @@index([author_id], name: "index_releases_on_author_id")
+  @@index([project_id], name: "index_releases_on_project_id")
+  @@index([project_id, tag], name: "index_releases_on_project_id_and_tag")
+}
+
+model remote_mirrors {
+  id                         Int       @default(autoincrement()) @id
+  project_id                 Int?
+  url                        String?
+  enabled                    Boolean?  @default(false)
+  update_status              String?
+  last_update_at             DateTime?
+  last_successful_update_at  DateTime?
+  last_update_started_at     DateTime?
+  last_error                 String?
+  only_protected_branches    Boolean   @default(false)
+  remote_name                String?
+  encrypted_credentials      String?
+  encrypted_credentials_iv   String?
+  encrypted_credentials_salt String?
+  created_at                 DateTime
+  updated_at                 DateTime
+  error_notification_sent    Boolean?
+  projects                   projects? @relation(fields: [project_id], references: [id])
+
+  @@index([last_successful_update_at], name: "index_remote_mirrors_on_last_successful_update_at")
+  @@index([project_id], name: "index_remote_mirrors_on_project_id")
+}
+
+model repository_languages {
+  project_id              Int
+  programming_language_id Int
+  share                   Float
+  projects                projects @relation(fields: [project_id], references: [id])
+
+  @@unique([project_id, programming_language_id], name: "index_repository_languages_on_project_and_languages_id")
+}
+
+model resource_label_events {
+  id                      Int             @default(autoincrement()) @id
+  action                  Int
+  issue_id                Int?
+  merge_request_id        Int?
+  label_id                Int?
+  user_id                 Int?
+  created_at              DateTime
+  cached_markdown_version Int?
+  reference               String?
+  reference_html          String?
+  issues                  issues?         @relation(fields: [issue_id], references: [id])
+  labels                  labels?         @relation(fields: [label_id], references: [id])
+  merge_requests          merge_requests? @relation(fields: [merge_request_id], references: [id])
+  users                   users?          @relation(fields: [user_id], references: [id])
+
+  @@index([issue_id], name: "index_resource_label_events_on_issue_id")
+  @@index([label_id], name: "index_resource_label_events_on_label_id")
+  @@index([merge_request_id], name: "index_resource_label_events_on_merge_request_id")
+  @@index([user_id], name: "index_resource_label_events_on_user_id")
+}
+
+model routes {
+  id          Int       @default(autoincrement()) @id
+  source_id   Int
+  source_type String
+  path        String    @unique
+  created_at  DateTime?
+  updated_at  DateTime?
+  name        String?
+
+  @@index([path], name: "index_routes_on_path_text_pattern_ops")
+  @@unique([source_type, source_id], name: "index_routes_on_source_type_and_source_id")
+}
+
+model schema_migrations {
+  version String @id
+}
+
+model sent_notifications {
+  id                        Int     @default(autoincrement()) @id
+  project_id                Int?
+  noteable_id               Int?
+  noteable_type             String?
+  recipient_id              Int?
+  commit_id                 String?
+  reply_key                 String  @unique
+  line_code                 String?
+  note_type                 String?
+  position                  String?
+  in_reply_to_discussion_id String?
+}
+
+model services {
+  id                         Int       @default(autoincrement()) @id
+  type                       String?
+  title                      String?
+  project_id                 Int?
+  created_at                 DateTime?
+  updated_at                 DateTime?
+  active                     Boolean   @default(false)
+  properties                 String?
+  template                   Boolean?  @default(false)
+  push_events                Boolean?  @default(true)
+  issues_events              Boolean?  @default(true)
+  merge_requests_events      Boolean?  @default(true)
+  tag_push_events            Boolean?  @default(true)
+  note_events                Boolean   @default(true)
+  category                   String    @default("common")
+  default                    Boolean?  @default(false)
+  wiki_page_events           Boolean?  @default(true)
+  pipeline_events            Boolean   @default(false)
+  confidential_issues_events Boolean   @default(true)
+  commit_events              Boolean   @default(true)
+  job_events                 Boolean   @default(false)
+  confidential_note_events   Boolean?  @default(true)
+  deployment_events          Boolean   @default(false)
+  projects                   projects? @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_services_on_project_id")
+  @@index([template], name: "index_services_on_template")
+  @@index([type], name: "index_services_on_type")
+}
+
+model shards {
+  id                   Int                    @default(autoincrement()) @id
+  name                 String                 @unique
+  pool_repositories    pool_repositories[]
+  project_repositories project_repositories[]
+}
+
+model snippets {
+  id                      Int       @default(autoincrement()) @id
+  title                   String?
+  content                 String?
+  author_id               Int
+  project_id              Int?
+  created_at              DateTime?
+  updated_at              DateTime?
+  file_name               String?
+  type                    String?
+  visibility_level        Int       @default(0)
+  title_html              String?
+  content_html            String?
+  cached_markdown_version Int?
+  description             String?
+  description_html        String?
+  projects                projects? @relation(fields: [project_id], references: [id])
+
+  @@index([author_id], name: "index_snippets_on_author_id")
+  @@index([file_name], name: "index_snippets_on_file_name_trigram")
+  @@index([project_id], name: "index_snippets_on_project_id")
+  @@index([title], name: "index_snippets_on_title_trigram")
+  @@index([updated_at], name: "index_snippets_on_updated_at")
+  @@index([visibility_level], name: "index_snippets_on_visibility_level")
+}
+
+model spam_logs {
+  id                 Int      @default(autoincrement()) @id
+  user_id            Int?
+  source_ip          String?
+  user_agent         String?
+  via_api            Boolean?
+  noteable_type      String?
+  title              String?
+  description        String?
+  created_at         DateTime
+  updated_at         DateTime
+  submitted_as_ham   Boolean  @default(false)
+  recaptcha_verified Boolean  @default(false)
+}
+
+model subscriptions {
+  id                Int       @default(autoincrement()) @id
+  user_id           Int?
+  subscribable_id   Int?
+  subscribable_type String?
+  subscribed        Boolean?
+  created_at        DateTime?
+  updated_at        DateTime?
+  project_id        Int?
+  projects          projects? @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_subscriptions_on_project_id")
+  @@unique([subscribable_id, subscribable_type, user_id, project_id], name: "index_subscriptions_on_subscribable_and_user_id_and_project_id")
+}
+
+model suggestions {
+  id             Int     @default(autoincrement()) @id
+  note_id        Int
+  relative_order Int
+  applied        Boolean @default(false)
+  commit_id      String?
+  from_content   String
+  to_content     String
+  lines_above    Int     @default(0)
+  lines_below    Int     @default(0)
+  outdated       Boolean @default(false)
+  notes          notes   @relation(fields: [note_id], references: [id])
+
+  @@unique([note_id, relative_order], name: "index_suggestions_on_note_id_and_relative_order")
+}
+
+model system_note_metadata {
+  id           Int      @default(autoincrement()) @id
+  note_id      Int      @unique
+  commit_count Int?
+  action       String?
+  created_at   DateTime
+  updated_at   DateTime
+  notes        notes    @relation(fields: [note_id], references: [id])
+}
+
+model taggings {
+  id            Int       @default(autoincrement()) @id
+  tag_id        Int?
+  taggable_id   Int?
+  taggable_type String?
+  tagger_id     Int?
+  tagger_type   String?
+  context       String?
+  created_at    DateTime?
+
+  @@index([tag_id], name: "index_taggings_on_tag_id")
+  @@index([taggable_id, taggable_type], name: "index_taggings_on_taggable_id_and_taggable_type")
+  @@index([taggable_id, taggable_type, context], name: "index_taggings_on_taggable_id_and_taggable_type_and_context")
+  @@unique([tag_id, taggable_id, taggable_type, context, tagger_id, tagger_type], name: "taggings_idx")
+}
+
+model tags {
+  id             Int     @default(autoincrement()) @id
+  name           String? @unique
+  taggings_count Int?    @default(0)
+
+  @@index([name], name: "index_tags_on_name_trigram")
+}
+
+model term_agreements {
+  id                        Int                       @default(autoincrement()) @id
+  term_id                   Int
+  user_id                   Int
+  accepted                  Boolean                   @default(false)
+  created_at                DateTime
+  updated_at                DateTime
+  application_setting_terms application_setting_terms @relation(fields: [term_id], references: [id])
+  users                     users                     @relation(fields: [user_id], references: [id])
+
+  @@index([term_id], name: "index_term_agreements_on_term_id")
+  @@index([user_id], name: "index_term_agreements_on_user_id")
+  @@unique([user_id, term_id], name: "term_agreements_unique_index")
+}
+
+model timelogs {
+  id               Int             @default(autoincrement()) @id
+  time_spent       Int
+  user_id          Int?
+  created_at       DateTime
+  updated_at       DateTime
+  issue_id         Int?
+  merge_request_id Int?
+  spent_at         DateTime?
+  issues           issues?         @relation(fields: [issue_id], references: [id])
+  merge_requests   merge_requests? @relation(fields: [merge_request_id], references: [id])
+
+  @@index([issue_id], name: "index_timelogs_on_issue_id")
+  @@index([merge_request_id], name: "index_timelogs_on_merge_request_id")
+  @@index([user_id], name: "index_timelogs_on_user_id")
+}
+
+model todos {
+  id                           Int         @default(autoincrement()) @id
+  user_id                      Int
+  project_id                   Int?
+  target_id                    Int?
+  target_type                  String
+  author_id                    Int
+  action                       Int
+  state                        String
+  created_at                   DateTime?
+  updated_at                   DateTime?
+  note_id                      Int?
+  commit_id                    String?
+  group_id                     Int?
+  users_todos_author_idTousers users       @relation("todos_author_idTousers", fields: [author_id], references: [id])
+  namespaces                   namespaces? @relation(fields: [group_id], references: [id])
+  notes                        notes?      @relation(fields: [note_id], references: [id])
+  projects                     projects?   @relation(fields: [project_id], references: [id])
+  users_todos_user_idTousers   users       @relation("todos_user_idTousers", fields: [user_id], references: [id])
+
+  @@index([author_id], name: "index_todos_on_author_id")
+  @@index([commit_id], name: "index_todos_on_commit_id")
+  @@index([group_id], name: "index_todos_on_group_id")
+  @@index([note_id], name: "index_todos_on_note_id")
+  @@index([project_id], name: "index_todos_on_project_id")
+  @@index([target_type, target_id], name: "index_todos_on_target_type_and_target_id")
+  @@index([user_id], name: "index_todos_on_user_id")
+  @@index([user_id, id], name: "index_todos_on_user_id_and_id_done")
+  @@index([user_id, id], name: "index_todos_on_user_id_and_id_pending")
+}
+
+model trending_projects {
+  id         Int      @default(autoincrement()) @id
+  project_id Int      @unique
+  projects   projects @relation(fields: [project_id], references: [id])
+}
+
+model u2f_registrations {
+  id          Int      @default(autoincrement()) @id
+  certificate String?
+  key_handle  String?
+  public_key  String?
+  counter     Int?
+  user_id     Int?
+  created_at  DateTime
+  updated_at  DateTime
+  name        String?
+  users       users?   @relation(fields: [user_id], references: [id])
+
+  @@index([key_handle], name: "index_u2f_registrations_on_key_handle")
+  @@index([user_id], name: "index_u2f_registrations_on_user_id")
+}
+
+model uploads {
+  id          Int      @default(autoincrement()) @id
+  size        Int
+  path        String
+  checksum    String?
+  model_id    Int?
+  model_type  String?
+  uploader    String
+  created_at  DateTime
+  mount_point String?
+  secret      String?
+  store       Int?
+
+  @@index([checksum], name: "index_uploads_on_checksum")
+  @@index([model_id, model_type], name: "index_uploads_on_model_id_and_model_type")
+  @@index([store], name: "index_uploads_on_store")
+  @@index([uploader, path], name: "index_uploads_on_uploader_and_path")
+}
+
+model user_agent_details {
+  id           Int      @default(autoincrement()) @id
+  user_agent   String
+  ip_address   String
+  subject_id   Int
+  subject_type String
+  submitted    Boolean  @default(false)
+  created_at   DateTime
+  updated_at   DateTime
+
+  @@index([subject_id, subject_type], name: "index_user_agent_details_on_subject_id_and_subject_type")
+}
+
+model user_callouts {
+  id           Int   @default(autoincrement()) @id
+  feature_name Int
+  user_id      Int
+  users        users @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "index_user_callouts_on_user_id")
+  @@unique([user_id, feature_name], name: "index_user_callouts_on_user_id_and_feature_name")
+}
+
+model user_custom_attributes {
+  id         Int      @default(autoincrement()) @id
+  created_at DateTime
+  updated_at DateTime
+  user_id    Int
+  key        String
+  value      String
+  users      users    @relation(fields: [user_id], references: [id])
+
+  @@index([key, value], name: "index_user_custom_attributes_on_key_and_value")
+  @@unique([user_id, key], name: "index_user_custom_attributes_on_user_id_and_key")
+}
+
+model user_interacted_projects {
+  user_id    Int
+  project_id Int
+  projects   projects @relation(fields: [project_id], references: [id])
+  users      users    @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "index_user_interacted_projects_on_user_id")
+  @@unique([project_id, user_id], name: "index_user_interacted_projects_on_project_id_and_user_id")
+}
+
+model user_preferences {
+  id                         Int      @default(autoincrement()) @id
+  user_id                    Int      @unique
+  issue_notes_filter         Int      @default(0)
+  merge_request_notes_filter Int      @default(0)
+  created_at                 DateTime
+  updated_at                 DateTime
+  first_day_of_week          Int?
+  issues_sort                String?
+  merge_requests_sort        String?
+  timezone                   String?
+  time_display_relative      Boolean?
+  time_format_in_24h         Boolean?
+  users                      users    @relation(fields: [user_id], references: [id])
+}
+
+model users {
+  id                                                                     Int                                  @default(autoincrement()) @id
+  email                                                                  String                               @default("") @unique
+  encrypted_password                                                     String                               @default("")
+  reset_password_token                                                   String?                              @unique
+  reset_password_sent_at                                                 DateTime?
+  remember_created_at                                                    DateTime?
+  sign_in_count                                                          Int?                                 @default(0)
+  current_sign_in_at                                                     DateTime?
+  last_sign_in_at                                                        DateTime?
+  current_sign_in_ip                                                     String?
+  last_sign_in_ip                                                        String?
+  created_at                                                             DateTime?
+  updated_at                                                             DateTime?
+  name                                                                   String?
+  admin                                                                  Boolean                              @default(false)
+  projects_limit                                                         Int
+  skype                                                                  String                               @default("")
+  linkedin                                                               String                               @default("")
+  twitter                                                                String                               @default("")
+  bio                                                                    String?
+  failed_attempts                                                        Int?                                 @default(0)
+  locked_at                                                              DateTime?
+  username                                                               String?
+  can_create_group                                                       Boolean                              @default(true)
+  can_create_team                                                        Boolean                              @default(true)
+  state                                                                  String?
+  color_scheme_id                                                        Int                                  @default(1)
+  password_expires_at                                                    DateTime?
+  created_by_id                                                          Int?
+  last_credential_check_at                                               DateTime?
+  avatar                                                                 String?
+  confirmation_token                                                     String?                              @unique
+  confirmed_at                                                           DateTime?
+  confirmation_sent_at                                                   DateTime?
+  unconfirmed_email                                                      String?
+  hide_no_ssh_key                                                        Boolean?                             @default(false)
+  website_url                                                            String                               @default("")
+  notification_email                                                     String?
+  hide_no_password                                                       Boolean?                             @default(false)
+  password_automatically_set                                             Boolean?                             @default(false)
+  location                                                               String?
+  encrypted_otp_secret                                                   String?
+  encrypted_otp_secret_iv                                                String?
+  encrypted_otp_secret_salt                                              String?
+  otp_required_for_login                                                 Boolean                              @default(false)
+  otp_backup_codes                                                       String?
+  public_email                                                           String                               @default("")
+  dashboard                                                              Int?                                 @default(0)
+  project_view                                                           Int?                                 @default(0)
+  consumed_timestep                                                      Int?
+  layout                                                                 Int?                                 @default(0)
+  hide_project_limit                                                     Boolean?                             @default(false)
+  unlock_token                                                           String?
+  otp_grace_period_started_at                                            DateTime?
+  external                                                               Boolean?                             @default(false)
+  incoming_email_token                                                   String?
+  organization                                                           String?
+  require_two_factor_authentication_from_group                           Boolean                              @default(false)
+  two_factor_grace_period                                                Int                                  @default(48)
+  ghost                                                                  Boolean?
+  last_activity_on                                                       DateTime?
+  notified_of_own_activity                                               Boolean?
+  preferred_language                                                     String?
+  theme_id                                                               Int?
+  accepted_term_id                                                       Int?
+  feed_token                                                             String?
+  private_profile                                                        Boolean?
+  include_private_contributions                                          Boolean?
+  commit_email                                                           String?
+  application_setting_terms                                              application_setting_terms?           @relation(fields: [accepted_term_id], references: [id])
+  application_settings                                                   application_settings[]
+  board_group_recent_visits                                              board_group_recent_visits[]
+  board_project_recent_visits                                            board_project_recent_visits[]
+  ci_pipeline_schedules                                                  ci_pipeline_schedules[]
+  ci_triggers                                                            ci_triggers[]
+  clusters                                                               clusters[]
+  events                                                                 events[]
+  gpg_keys                                                               gpg_keys[]
+  issue_assignees                                                        issue_assignees[]
+  issues_issues_author_idTousers                                         issues[]                             @relation("issues_author_idTousers")
+  issues_issues_closed_by_idTousers                                      issues[]                             @relation("issues_closed_by_idTousers")
+  issues_issues_updated_by_idTousers                                     issues[]                             @relation("issues_updated_by_idTousers")
+  lfs_file_locks                                                         lfs_file_locks[]
+  members                                                                members[]
+  merge_request_assignees                                                merge_request_assignees[]
+  merge_request_metrics_merge_request_metrics_latest_closed_by_idTousers merge_request_metrics[]              @relation("merge_request_metrics_latest_closed_by_idTousers")
+  merge_request_metrics_merge_request_metrics_merged_by_idTousers        merge_request_metrics[]              @relation("merge_request_metrics_merged_by_idTousers")
+  merge_requests_merge_requests_assignee_idTousers                       merge_requests[]                     @relation("merge_requests_assignee_idTousers")
+  merge_requests_merge_requests_author_idTousers                         merge_requests[]                     @relation("merge_requests_author_idTousers")
+  merge_requests_merge_requests_merge_user_idTousers                     merge_requests[]                     @relation("merge_requests_merge_user_idTousers")
+  merge_requests_merge_requests_updated_by_idTousers                     merge_requests[]                     @relation("merge_requests_updated_by_idTousers")
+  merge_trains                                                           merge_trains[]
+  notification_settings                                                  notification_settings[]
+  personal_access_tokens                                                 personal_access_tokens[]
+  project_authorizations                                                 project_authorizations[]
+  protected_tag_create_access_levels                                     protected_tag_create_access_levels[]
+  releases                                                               releases[]
+  resource_label_events                                                  resource_label_events[]
+  term_agreements                                                        term_agreements[]
+  todos_todos_author_idTousers                                           todos[]                              @relation("todos_author_idTousers")
+  todos_todos_user_idTousers                                             todos[]                              @relation("todos_user_idTousers")
+  u2f_registrations                                                      u2f_registrations[]
+  user_callouts                                                          user_callouts[]
+  user_custom_attributes                                                 user_custom_attributes[]
+  user_interacted_projects                                               user_interacted_projects[]
+  user_preferences                                                       user_preferences?
+  user_statuses                                                          user_statuses[]
+  user_synced_attributes_metadata                                        user_synced_attributes_metadata?
+
+  @@index([accepted_term_id], name: "index_users_on_accepted_term_id")
+  @@index([admin], name: "index_users_on_admin")
+  @@index([created_at], name: "index_users_on_created_at")
+  @@index([email], name: "index_users_on_email_trigram")
+  @@index([feed_token], name: "index_users_on_feed_token")
+  @@index([ghost], name: "index_users_on_ghost")
+  @@index([incoming_email_token], name: "index_users_on_incoming_email_token")
+  @@index([name], name: "index_users_on_name")
+  @@index([name], name: "index_users_on_name_trigram")
+  @@index([state], name: "index_users_on_state")
+  @@index([username], name: "index_users_on_username")
+  @@index([username], name: "index_users_on_username_trigram")
+}
+
+model users_star_projects {
+  id         Int       @default(autoincrement()) @id
+  project_id Int
+  user_id    Int
+  created_at DateTime?
+  updated_at DateTime?
+  projects   projects  @relation(fields: [project_id], references: [id])
+
+  @@index([project_id], name: "index_users_star_projects_on_project_id")
+  @@unique([user_id, project_id], name: "index_users_star_projects_on_user_id_and_project_id")
+}
+
+model user_statuses {
+  user_id                 Int     @default(autoincrement()) @id
+  cached_markdown_version Int?
+  emoji                   String  @default("speech_balloon")
+  message                 String?
+  message_html            String?
+  users                   users   @relation(fields: [user_id], references: [id])
+
+  @@index([user_id], name: "index_user_statuses_on_user_id")
+}
+
+model user_synced_attributes_metadata {
+  id              Int      @default(autoincrement()) @id
+  name_synced     Boolean? @default(false)
+  email_synced    Boolean? @default(false)
+  location_synced Boolean? @default(false)
+  user_id         Int      @unique
+  provider        String?
+  users           users    @relation(fields: [user_id], references: [id])
+}
+
+model web_hook_logs {
+  id                     Int       @default(autoincrement()) @id
+  web_hook_id            Int
+  trigger                String?
+  url                    String?
+  request_headers        String?
+  request_data           String?
+  response_headers       String?
+  response_body          String?
+  response_status        String?
+  execution_duration     Float?
+  internal_error_message String?
+  created_at             DateTime
+  updated_at             DateTime
+  web_hooks              web_hooks @relation(fields: [web_hook_id], references: [id])
+
+  @@index([created_at, web_hook_id], name: "index_web_hook_logs_on_created_at_and_web_hook_id")
+  @@index([web_hook_id], name: "index_web_hook_logs_on_web_hook_id")
+}
+
+model web_hooks {
+  id                         Int             @default(autoincrement()) @id
+  project_id                 Int?
+  created_at                 DateTime?
+  updated_at                 DateTime?
+  type                       String?         @default("ProjectHook")
+  service_id                 Int?
+  push_events                Boolean         @default(true)
+  issues_events              Boolean         @default(false)
+  merge_requests_events      Boolean         @default(false)
+  tag_push_events            Boolean?        @default(false)
+  note_events                Boolean         @default(false)
+  enable_ssl_verification    Boolean?        @default(true)
+  wiki_page_events           Boolean         @default(false)
+  pipeline_events            Boolean         @default(false)
+  confidential_issues_events Boolean         @default(false)
+  repository_update_events   Boolean         @default(false)
+  job_events                 Boolean         @default(false)
+  confidential_note_events   Boolean?
+  push_events_branch_filter  String?
+  encrypted_token            String?
+  encrypted_token_iv         String?
+  encrypted_url              String?
+  encrypted_url_iv           String?
+  projects                   projects?       @relation(fields: [project_id], references: [id])
+  web_hook_logs              web_hook_logs[]
+
+  @@index([project_id], name: "index_web_hooks_on_project_id")
+  @@index([type], name: "index_web_hooks_on_type")
 }

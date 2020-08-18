@@ -50,7 +50,7 @@ export class Run implements Command {
       reply
         .code(200)
         .header('Content-Type', 'application/json; charset=utf-8')
-        .send(dmmf)
+        .send(dmmf.datamodel)
     })
 
     // Run the server!

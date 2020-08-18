@@ -18,15 +18,15 @@ window.addEventListener("load", async function() {
    
     
     const schema = await (await fetch('/public/schema.prisma')).text()
-    const dmmf = await (await fetch('/generate', {method: "POST", body: schema, })).json()
-    let canvas = new Canvas("canvas", dmmf.datamodel as DMMF.Datamodel)
+    const datamodel = await (await fetch('/generate', {method: "POST", body: schema, })).json()
+    let canvas = new Canvas("canvas", datamodel as DMMF.Datamodel)
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/twilight");
     editor.setValue(schema)
     var PrismaMode = ace.require("ace/mode/prisma").Mode;
     editor.session.setMode(new PrismaMode());
     generateButton && generateButton.addEventListener('click', async () => {
-        const dmmf = await (await fetch('/generate', {method: "POST", body: editor.getValue(), })).json()
-        canvas.updateDatamodel(dmmf.datamodel)
+        const datamodel = await (await fetch('/generate', {method: "POST", body: editor.getValue(), })).json()
+        canvas.updateDatamodel(datamodel)
     })
 }, false);
