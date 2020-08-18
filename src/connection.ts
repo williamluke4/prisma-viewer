@@ -18,7 +18,7 @@ export function drawSpline(ctx: CanvasRenderingContext2D ,start: Vec, end: Vec){
   ctx.stroke()
 }
 
-export class Spring {
+export class Connection {
   from_model_idx: number;
   to_model_idx: number;
   from_field_idx: number;
@@ -35,7 +35,7 @@ export class Spring {
       this.to_field_idx = to_field_idx
       this.length = length || STRING_LEN 
   }
-  public render(ctx: CanvasRenderingContext2D, models: Model[]){
+  public draw(ctx: CanvasRenderingContext2D, models: Model[]){
     let a = models[this.from_model_idx];
     let b = models[this.to_model_idx];
     const start = a.pos.copy()

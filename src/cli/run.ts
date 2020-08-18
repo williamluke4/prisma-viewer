@@ -44,6 +44,14 @@ export class Run implements Command {
     server.get('/', async (request, reply) => {
       (reply as any).sendFile('index.html') // serving path.join(__dirname, 'public', 'myHtml.html') directly
     })
+    server.post('/generate', async (request, reply) => {
+      const schema = request.body;
+      const dmmf = await getDMMF({datamodel: schema});
+      reply
+        .code(200)
+        .header('Content-Type', 'application/json; charset=utf-8')
+        .send(dmmf.datamodel)
+    })
 
     // Run the server!
     const start = async () => {

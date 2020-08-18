@@ -1,12 +1,12 @@
 import * as dagre from 'dagre';
 import { Model } from './model';
-import { Spring } from './spring';
+import { Connection } from './connection';
 import { Vec } from './vector';
 
 
 const type = ["LR", "RL", "TB", "BT"]
 let selection = 0
-export function autolayout(models: Model[], connections: Spring[]){
+export function autolayout(models: Model[], connections: Connection[], toggle = false){
   const g = new dagre.graphlib.Graph();
   
   // Set an object for the graph label
@@ -33,10 +33,12 @@ export function autolayout(models: Model[], connections: Spring[]){
     models[parseInt(v)].pos = pos
   });
   const graph = g.graph()
-  if(selection === 4){
-    selection = 0
-  } else {
-    selection +=1
+  if(toggle){
+    if(selection === 4){
+      selection = 0
+    } else {
+      selection +=1
+    }
   }
   return {width: graph.width, height: graph.height}
 

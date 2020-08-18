@@ -17,7 +17,7 @@ class ModelField{
     const isRequired = this.field.isRequired ? '' : '?'
     return typename + isRequired + isList;
   }
-  public render(ctx: CanvasRenderingContext2D){
+  public draw(ctx: CanvasRenderingContext2D){
     ctx.fillStyle = "white";
     ctx.fillRect(this.parent.pos.x, this.parent.pos.y +   FIELD_HEIGHT * (this.index + 1), this.parent.width, FIELD_HEIGHT)
     ctx.fillStyle = "black";
@@ -54,9 +54,8 @@ class ModelHeader{
     this.height = 20;
     this.model = model;
   }
-  public render(ctx: CanvasRenderingContext2D){
+  public draw(ctx: CanvasRenderingContext2D){
     ctx.fillStyle = "white";
-    // console.log(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.parent.height);
     ctx.fillRect(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.parent.height)
     ctx.fillStyle = "#15BD76";
     ctx.fillRect(this.parent.pos.x, this.parent.pos.y, this.parent.width, this.height)
@@ -91,14 +90,14 @@ export class Model {
   public cy(){
     return this.pos.y + (this.height / 2)
   }
-  public render(ctx: CanvasRenderingContext2D, hovering: boolean, dragging: boolean){
+  public draw(ctx: CanvasRenderingContext2D, hovering: boolean, dragging: boolean){
     const header = new ModelHeader(this, this.model)
-    header.render(ctx)
+    header.draw(ctx)
     ctx.fillStyle = "white";
     ctx.rect(this.pos.x, this.pos.y + 20, this.width, this.height - 20)
     this.model.fields.forEach((field, i) => {
       const f = new ModelField(this, i +1, field)
-      f.render(ctx);
+      f.draw(ctx);
     })
   }
 }
