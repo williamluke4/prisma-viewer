@@ -1,3 +1,15 @@
+# v1.2.0 (Tue Aug 18 2020)
+
+#### 🚀  Enhancement
+
+- feat: Ace editor and Prisma Bump [#9](https://github.com/williamluke4/prisma-viewer/pull/9) ([@williamluke4](https://github.com/williamluke4))
+
+#### Authors: 1
+
+- William Luke ([@williamluke4](https://github.com/williamluke4))
+
+---
+
 # v1.1.0 (Sat Feb 22 2020)
 
 #### 🚀  Enhancement
