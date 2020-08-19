@@ -10,7 +10,7 @@
     "dev:web": "parcel watch src/index.ts -d public",
     "dev:cli": "ts-node ./src/bin.ts",
     "dev": "npm run dev:web & npm run dev:cli",
-    "release": "auto shipit"
+    "release": "npm run build && auto shipit"
   },
   "bin": {
     "pv": "dist/bin.js"
