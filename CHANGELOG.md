@@ -1,3 +1,15 @@
+# v1.3.1 (Wed Aug 19 2020)
+
+#### 🐛 Bug Fix
+
+- fix: Bump Deps ([@williamluke4](https://github.com/williamluke4))
+
+#### Authors: 1
+
+- William Luke ([@williamluke4](https://github.com/williamluke4))
+
+---
+
 # v1.3.0 (Wed Aug 19 2020)
 
 #### 🚀  Enhancement
