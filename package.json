@@ -1,6 +1,6 @@
 {
   "name": "prisma-viewer",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Displays Prisma Datamodels/Schemas",
   "main": "index.js",
   "scripts": {
