@@ -8,6 +8,7 @@ import { Command } from './helpers/types';
 import * as path from 'path';
 import Fastify from 'fastify';
 import { Server, IncomingMessage, ServerResponse } from 'http'
+import open from 'open';
 
 const server: Fastify.FastifyInstance = Fastify({})
 
@@ -65,12 +66,15 @@ export class Run implements Command {
         await server.listen(3000)
         let address = server.server.address();
         address = typeof address === 'string' ? address : `${address?.address}:${address?.port}`
-        console.log(`Server listening on http://${address}`)
+        const url = `http://${address}`
+        return url
       } catch (err) {
         process.exit(1)
       }
     }
-    start()
+    const url = await start()
+    console.log(chalk.green(`✔ Opening Browser to ${url}`));
+    await open(url)
     return ''
   }
 }
