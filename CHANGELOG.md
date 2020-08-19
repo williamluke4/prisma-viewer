@@ -2,7 +2,7 @@
 
 #### 🐛  Bug Fix
 
-- fix: Error Handleing  ([@williamluke4](https://github.com/williamluke4))
+- fix: Error Handling  ([@williamluke4](https://github.com/williamluke4))
 
 #### Authors: 1
 
