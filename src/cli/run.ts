@@ -46,11 +46,17 @@ export class Run implements Command {
     })
     server.post('/generate', async (request, reply) => {
       const schema = request.body;
-      const dmmf = await getDMMF({datamodel: schema});
-      reply
-        .code(200)
-        .header('Content-Type', 'application/json; charset=utf-8')
-        .send(dmmf.datamodel)
+      try{
+        const dmmf = await getDMMF({datamodel: schema});
+        reply
+          .code(200)
+          .header('Content-Type', 'application/json; charset=utf-8')
+          .send(dmmf.datamodel)
+      } catch (err) {
+        reply
+          .code(500)
+          .send(err)
+      }
     })
 
     // Run the server!
