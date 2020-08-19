@@ -1,4 +1,3 @@
-
 <p align="center">
   <img style="border-radius: 8px;" width="100%" height="auto" src="viewer.png">
 </p>
@@ -8,14 +7,15 @@
  <a href="https://www.npmjs.com/package/prisma-viewer">
   <img style="padding: 0px 8px;" src="https://img.shields.io/npm/v/prisma-viewer/latest?style=for-the-badge"/>
   </a>
-    <a href="https://www.npmjs.com/package/prisma-viewer">
-    <img style="padding: 0px 8px;" src="https://img.shields.io/npm/v/prisma-viewer/canary?color=orange&style=for-the-badge"/>
+  <a href="https://www.npmjs.com/package/prisma-viewer">
+  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/williamluke4/prisma-viewer?style=for-the-badge">
     </a>
 </p>
+<h2 align="center" style="">
+<i>🐉 Here be dragons!!</i>
+</h2>
 
-**🐉 Here be dragons!!**
-
-For use with [Prisma](https://www.prisma.io/) Datamodels
+### For use with [Prisma](https://www.prisma.io/) Datamodels
 
 ## Installation
 
@@ -43,6 +43,7 @@ canary
 ## Usage Playground
 
 When viewing the schema/datamodel:
+
 - Press the `a` key to change the layout
 - Use a `scroll wheel` to `zoom in/out`
 - `Click and drag` to `pan`
