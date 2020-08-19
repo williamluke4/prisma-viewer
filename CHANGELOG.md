@@ -1,3 +1,21 @@
+# v1.3.0 (Wed Aug 19 2020)
+
+#### 🚀  Enhancement
+
+- feat: Add Auto Open  ([@williamluke4](https://github.com/williamluke4))
+
+#### ⚠️  Pushed to master
+
+- chore: Add Title To Page  ([@williamluke4](https://github.com/williamluke4))
+- chore: Update Readme  ([@williamluke4](https://github.com/williamluke4))
+- chore: Build Before Release 🙈  ([@williamluke4](https://github.com/williamluke4))
+
+#### Authors: 1
+
+- William Luke ([@williamluke4](https://github.com/williamluke4))
+
+---
+
 # v1.2.2 (Wed Aug 19 2020)
 
 #### 🐛  Bug Fix
