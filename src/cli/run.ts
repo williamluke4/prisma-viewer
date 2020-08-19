@@ -6,11 +6,11 @@ import * as fs from 'fs';
 import chalk from 'chalk';
 import { Command } from './helpers/types';
 import * as path from 'path';
-import Fastify from 'fastify';
+import * as Fastify from 'fastify';
 import { Server, IncomingMessage, ServerResponse } from 'http'
 import open from 'open';
 
-const server: Fastify.FastifyInstance = Fastify({})
+const server: Fastify.FastifyInstance = Fastify.default({})
 
 function getSchemaPath(schemaPath?: string): string {
   if(schemaPath && fs.existsSync(schemaPath)){
@@ -48,7 +48,7 @@ export class Run implements Command {
     server.post('/generate', async (request, reply) => {
       const schema = request.body;
       try{
-        const dmmf = await getDMMF({datamodel: schema});
+        const dmmf = await getDMMF({datamodel: schema as string});
         reply
           .code(200)
           .header('Content-Type', 'application/json; charset=utf-8')
